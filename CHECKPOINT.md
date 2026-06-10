@@ -8,6 +8,7 @@ Current safe state:
 - First local-first MVP app code has been generated.
 - Level 1 CrewPay Ledger Workbook generator and workbook have been generated.
 - Level 1.5 Phase 1 Apps Script helper files have been generated.
+- Level 1.5 Google service helpers have been generated for proof exports, selected admin notice send, and selected schedule Calendar sync.
 
 Project files:
 - README.md
@@ -19,7 +20,7 @@ Current purpose:
 Validate the workbook-first Level 1 ledger and keep the local app optional.
 
 Next intended action:
-Install `apps_script/Code.gs` in a copy of the Google Sheets workbook and manually test the Phase 1 menu helpers.
+Install `apps_script/Code.gs` in a copy of the Google Sheets workbook and manually test the Drive, Gmail, and Calendar helper permissions and behavior.
 
 Critical reminder:
 CrewPay Ledger must protect worker proof even when admin access is removed.
@@ -35,10 +36,17 @@ Gap fix added:
 - Workbook-first source-of-truth build added with workbook audit and acceptance documentation.
 - Workbook revision tightened Worker Proof selector guard, print setup, worker-specific totals, ID dropdown validation, inactive-worker row flagging, and helper-ready log formatting.
 - Apps Script Phase 1 helper layer added for menu actions, proof refresh, proof/access/correction logging, and email-ready notice text only.
+- Apps Script Google service helpers added for selected Worker Proof PDF/CSV Drive exports, selected Admin Notice Gmail send, and selected Schedule Calendar sync.
 
 Apps Script Phase 1 live test:
 - Google Sheets copy tested.
 - apps_script/Code.gs installed.
 - CrewPay Ledger menu appeared.
 - Phase 1 helper behavior worked.
-- No Gmail send or Calendar sync included yet.
+- At the Phase 1 test point, no Gmail send or Calendar sync was included.
+
+Apps Script Google service helper status:
+- CSV/PDF proof exports create worker/pay-period-specific Drive files and log Proof Exports rows.
+- Gmail send uses selected Admin Notices rows only and sends from the admin account running the script.
+- Calendar sync uses selected Schedule rows only and logs Calendar Sync Log rows.
+- Calendar remains schedule reference only, not proof.

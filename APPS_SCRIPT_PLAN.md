@@ -14,8 +14,8 @@ Allowed:
 - Helper actions that read/write workbook tabs
 - Proof generation/export helpers
 - Email-ready notice helpers
-- Optional Gmail send from the admin account later
-- Optional Google Calendar event creation/update later
+- Optional Gmail send from the admin account
+- Optional Google Calendar event creation/update
 - Logging helper actions
 
 Not allowed:
@@ -57,6 +57,9 @@ Build after Phase 1 works:
 Reason:
 These are useful but should come after proof selection and logs are reliable.
 
+Status:
+Built in `apps_script/Code.gs`. Exports validate the selected Worker Proof context, create selected worker/pay-period files in Drive, and log Proof Exports rows.
+
 ### Phase 3 — Optional Google Helpers
 
 Build only after manual workbook and Phase 1/2 helpers are stable:
@@ -66,30 +69,21 @@ Build only after manual workbook and Phase 1/2 helpers are stable:
 Reason:
 These touch account permissions and can increase setup complexity.
 
+Status:
+Built in `apps_script/Code.gs` after explicit approval. Gmail sends only selected Admin Notices from the admin account. Calendar sync touches only selected Schedule rows and remains planning/reference only.
+
 ## Proposed Custom Menu
 
-Current Phase 1 menu:
+Current menu:
 - Generate Worker Proof
 - Log Proof Export
-- Log Access Change
-- Log Correction
-- Create Email-Ready Notice
-- About CrewPay Ledger
-
-Future expanded menu candidates:
-
-Menu name:
-CrewPay Ledger
-
-Menu items:
-- Generate Worker Proof
-- Log Proof Export
-- Export Worker Proof PDF
 - Export Worker Proof CSV
-- Create Email-Ready Notice
+- Export Worker Proof PDF
+- Send Selected Admin Notice
+- Sync Selected Schedule to Calendar
 - Log Access Change
 - Log Correction
-- Sync Selected Schedule to Calendar
+- Create Email-Ready Notice
 - About CrewPay Ledger
 
 ## Helper Details
@@ -145,6 +139,7 @@ Reads:
 
 Writes:
 - Proof Exports log
+- Drive PDF file
 
 Must not:
 - Export all workers.
@@ -160,6 +155,7 @@ Reads:
 
 Writes:
 - Proof Exports log
+- Drive CSV file
 
 Must not:
 - Include other workers.
@@ -187,9 +183,6 @@ Must not:
 
 Purpose:
 Send selected Admin Notice using admin Gmail account.
-
-Phase:
-Later only.
 
 Reads:
 - Admin Notices
@@ -241,9 +234,6 @@ Must:
 Purpose:
 Create/update calendar events from Schedule rows.
 
-Phase:
-Later only.
-
 Reads:
 - Schedule
 - Jobs
@@ -273,7 +263,5 @@ Before considering Level 1.5 complete:
 ## Deferred
 
 Do not build these until explicitly approved:
-- Gmail send helper
-- Google Calendar sync helper
 - Worker Field Timesheet app bridge
 - Admin Companion app bridge
