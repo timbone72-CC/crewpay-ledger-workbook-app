@@ -16,6 +16,32 @@ The workbook must work even if the optional admin companion app is never used.
 - Worker proof exports must be worker-specific.
 - Admin corrections must be visible, not silent.
 
+## Level 1.5 Helper Scope
+
+The workbook should be designed so free Google Apps Script helpers can be added without changing the core workbook structure.
+
+Allowed Level 1.5 helpers:
+- Custom workbook menu
+- Generate worker proof
+- Export worker proof to PDF or CSV
+- Create email-ready notice text
+- Optional Gmail send from the admin account
+- Optional Google Calendar event creation or update
+- Log proof exports
+- Log access changes
+- Log calendar sync attempts
+
+Not allowed in Level 1.5:
+- Paid APIs
+- Backend server
+- Real database
+- Worker accounts
+- Enterprise permissions
+- Full payroll automation
+
+Rule:
+The workbook must still work manually if Apps Script is removed or disabled.
+
 ## Proposed Tab Order
 
 1. Instructions
