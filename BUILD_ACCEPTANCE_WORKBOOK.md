@@ -15,7 +15,7 @@ PASS
 Verified:
 - `python3 build_crewpay_ledger_workbook.py` runs successfully.
 - `CrewPay_Ledger_Workbook.xlsx` is created.
-- Workbook has exactly 14 tabs.
+- Workbook has exactly 16 tabs.
 - Tab order matches the approved order:
   1. Instructions
   2. Dashboard
@@ -24,18 +24,22 @@ Verified:
   5. Time Entries
   6. Pay Periods
   7. Worker Proof
-  8. Proof Exports
-  9. Access Log
-  10. Correction Log
-  11. Schedule
-  12. Admin Notices
-  13. Calendar Sync Log
-  14. Dropdown Lists
+  8. Access Status Demo
+  9. Workflow Demo
+  10. Proof Exports
+  11. Access Log
+  12. Correction Log
+  13. Schedule
+  14. Admin Notices
+  15. Calendar Sync Log
+  16. Dropdown Lists
+- Public-demo presentation tabs are visually styled and explanatory only.
 - Required headers exist on all data and log tabs.
 - Dropdown Lists tab exists and contains approved values.
 - Data validation is applied where practical.
 - Sample data includes active and inactive worker scenarios.
 - Worker Proof is structured around one selected worker and one selected pay period.
+- Worker Proof is styled as a print-ready proof/report page.
 - Worker Proof includes a selector check that warns when the selected pay period belongs to another worker.
 - Worker Proof totals are calculated from the selected worker and selected pay-period date range.
 - Worker Proof has a defined print area and landscape fit-to-page setup.
@@ -46,6 +50,8 @@ Verified:
 - Schedule exists as planning/reference only and does not act as proof.
 - Admin Notices exists as one-way notices only and does not act as chat or proof.
 - Proof Exports, Access Log, Correction Log, Schedule, Admin Notices, and Calendar Sync Log are structured for later helper scripts while remaining manually usable.
+- Dashboard and Instructions use public-demo card layouts.
+- Data and log tabs use styled tables with frozen headers, filters, alternating row fills, and status formatting.
 - No app dependency is required by the workbook.
 - No backend, real database, paid API, worker account, payroll tax logic, HR compliance logic, enterprise permissions, Apps Script, or Google API integration was added.
 

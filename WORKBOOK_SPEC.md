@@ -51,13 +51,15 @@ The workbook must still work manually if Apps Script is removed or disabled.
 5. Time Entries
 6. Pay Periods
 7. Worker Proof
-8. Proof Exports
-9. Access Log
-10. Correction Log
-11. Schedule
-12. Admin Notices
-13. Calendar Sync Log
-14. Dropdown Lists
+8. Access Status Demo
+9. Workflow Demo
+10. Proof Exports
+11. Access Log
+12. Correction Log
+13. Schedule
+14. Admin Notices
+15. Calendar Sync Log
+16. Dropdown Lists
 
 ## Tab Details
 
@@ -214,6 +216,22 @@ Must show:
 
 Rule:
 Worker Proof must never show another worker's records.
+
+### Access Status Demo
+
+Purpose:
+Public-demo visual explanation of active, inactive, and former/read-only worker access behavior.
+
+Rule:
+This tab is explanatory only. It is not a data source.
+
+### Workflow Demo
+
+Purpose:
+Public-demo visual flow from time entry through submission, admin review, pay period creation, proof export, and inactive-worker archive.
+
+Rule:
+This tab is explanatory only. It is not a data source.
 
 ### Proof Exports
 

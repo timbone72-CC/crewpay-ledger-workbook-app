@@ -9,6 +9,7 @@ Current safe state:
 - Level 1 CrewPay Ledger Workbook generator and workbook have been generated.
 - Level 1.5 Phase 1 Apps Script helper files have been generated.
 - Level 1.5 Google service helpers have been generated for proof exports, selected admin notice send, and selected schedule Calendar sync.
+- Public-demo workbook UI has been redesigned with card-style report pages, styled tables, status colors, and visual workflow/access demo tabs.
 
 Project files:
 - README.md
@@ -37,6 +38,7 @@ Gap fix added:
 - Workbook revision tightened Worker Proof selector guard, print setup, worker-specific totals, ID dropdown validation, inactive-worker row flagging, and helper-ready log formatting.
 - Apps Script Phase 1 helper layer added for menu actions, proof refresh, proof/access/correction logging, and email-ready notice text only.
 - Apps Script Google service helpers added for selected Worker Proof PDF/CSV Drive exports, selected Admin Notice Gmail send, and selected Schedule Calendar sync.
+- Workbook public-demo presentation redesigned without changing ledger data headers; Access Status Demo and Workflow Demo are explanatory-only tabs.
 
 Apps Script Phase 1 live test:
 - Google Sheets copy tested.
