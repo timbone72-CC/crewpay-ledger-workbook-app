@@ -50,3 +50,13 @@ Apps Script Google service helper status:
 - Gmail send uses selected Admin Notices rows only and sends from the admin account running the script.
 - Calendar sync uses selected Schedule rows only and logs Calendar Sync Log rows.
 - Calendar remains schedule reference only, not proof.
+
+Google services Apps Script live test:
+- Google Sheets copy tested.
+- CSV export worked.
+- PDF export worked.
+- Drive file creation worked.
+- Gmail send worked with controlled test recipient.
+- Google Calendar sync worked.
+- Related logs updated.
+- Workbook remains the Level 1 source of truth.

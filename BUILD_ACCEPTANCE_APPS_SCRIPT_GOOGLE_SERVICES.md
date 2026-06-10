@@ -91,3 +91,22 @@ Required manual checks in a Google Sheets copy:
 - Sync one selected Schedule row to Calendar.
 - Confirm Calendar Sync Log row is written.
 - Confirm workbook remains usable without relying on Apps Script.
+
+## Live Google Sheets Test
+
+Status:
+PASS
+
+Confirmed manually in a Google Sheets copy:
+- Updated apps_script/Code.gs installed.
+- Sheet saved and reloaded.
+- CrewPay Ledger menu appeared.
+- Export Worker Proof CSV worked.
+- Export Worker Proof PDF worked.
+- Drive file creation worked for proof exports.
+- Send Selected Admin Notice worked with a controlled test recipient.
+- Sync Selected Schedule to Calendar worked.
+- Proof Exports log updated.
+- Admin Notices status/log behavior worked.
+- Calendar Sync Log updated.
+- Workbook remained the Level 1 source of truth.
