@@ -61,3 +61,17 @@ PASS
 - Static grep found no `GmailApp`, `MailApp`, `CalendarApp`, `DriveApp`, `UrlFetchApp`, or `Jdbc` usage.
 - Existing workbook generator still runs.
 - Existing app acceptance tests still pass.
+
+## Live Google Sheets Test
+
+Status:
+PASS
+
+Confirmed manually in a Google Sheets copy:
+- Apps Script installed from apps_script/Code.gs.
+- Sheet reloaded successfully.
+- CrewPay Ledger menu appeared.
+- Phase 1 helper behavior worked in Google Sheets.
+- No Gmail send helper was tested or required.
+- No Google Calendar sync helper was tested or required.
+- Workbook remained usable as the Level 1 source of truth.

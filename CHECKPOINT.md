@@ -35,3 +35,10 @@ Gap fix added:
 - Workbook-first source-of-truth build added with workbook audit and acceptance documentation.
 - Workbook revision tightened Worker Proof selector guard, print setup, worker-specific totals, ID dropdown validation, inactive-worker row flagging, and helper-ready log formatting.
 - Apps Script Phase 1 helper layer added for menu actions, proof refresh, proof/access/correction logging, and email-ready notice text only.
+
+Apps Script Phase 1 live test:
+- Google Sheets copy tested.
+- apps_script/Code.gs installed.
+- CrewPay Ledger menu appeared.
+- Phase 1 helper behavior worked.
+- No Gmail send or Calendar sync included yet.
