@@ -32,3 +32,4 @@ Gap fix added:
 - Worker-only proof export privacy rule clarified.
 - MVP app code added with dependency-free acceptance tests.
 - Workbook-first source-of-truth build added with workbook audit and acceptance documentation.
+- Workbook revision tightened Worker Proof selector guard, print setup, worker-specific totals, ID dropdown validation, inactive-worker row flagging, and helper-ready log formatting.

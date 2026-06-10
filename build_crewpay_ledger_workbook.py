@@ -138,6 +138,14 @@ def add_validation(ws, list_name, cell_range):
     dv.add(cell_range)
 
 
+def add_range_validation(ws, source_range, cell_range):
+    dv = DataValidation(type="list", formula1=source_range, allow_blank=True)
+    dv.errorTitle = "Invalid value"
+    dv.error = "Choose a value from the approved workbook range."
+    ws.add_data_validation(dv)
+    dv.add(cell_range)
+
+
 def as_date(value):
     if not value:
         return None
@@ -185,6 +193,7 @@ def build_instructions(ws):
         ("Schedule and Calendar", "Schedule is planning only. Future Google Calendar sync may mirror schedules, but calendar rows are not proof."),
         ("Admin Notices", "Admin Notices are one-way admin notices. They are not chat, worker-to-worker messaging, or proof."),
         ("Level 1.5 readiness", "Future free Apps Script helpers may add menus, proof exports, notice drafts, calendar sync logs, and access logs without restructuring the workbook."),
+        ("Manual-first rule", "The workbook must remain usable manually. Any future script helper should write back to the Proof Exports, Access Log, Correction Log, or Calendar Sync Log tabs instead of becoming the source of truth."),
     ]
     row = 3
     for heading, body in lines:
@@ -240,6 +249,8 @@ def build_time_entries(ws):
         ws[f"L{row}"] = f'=IF(OR(J{row}="",K{row}=""),"",J{row}*K{row})'
         ws[f"O{row}"] = f'=IF(L{row}="","",L{row}+M{row}-N{row})'
     add_validation(ws, "Approval Status", "P2:P200")
+    add_range_validation(ws, "Workers!$A$2:$A$200", "B2:B200")
+    add_range_validation(ws, "Jobs!$A$2:$A$200", "D2:D200")
     for row in range(2, ws.max_row + 1):
         ws[f"F{row}"].value = as_date(ws[f"F{row}"].value)
         ws[f"G{row}"].value = as_time(ws[f"G{row}"].value)
@@ -257,6 +268,13 @@ def build_time_entries(ws):
             ws[f"{col}{row}"].number_format = "$#,##0.00"
     ws.conditional_formatting.add("A2:T200", FormulaRule(formula=['$P2="Submitted"'], fill=PatternFill("solid", fgColor="FFF2CC")))
     ws.conditional_formatting.add("A2:T200", FormulaRule(formula=['$S2<>""'], fill=PatternFill("solid", fgColor="FCE7E7")))
+    ws.conditional_formatting.add(
+        "A2:T200",
+        FormulaRule(
+            formula=['IFERROR(VLOOKUP($B2,Workers!$A:$E,5,FALSE)="Inactive",FALSE)'],
+            fill=PatternFill("solid", fgColor="E5E7EB"),
+        ),
+    )
 
 
 def build_pay_periods(ws):
@@ -272,6 +290,7 @@ def build_pay_periods(ws):
         ws[f"L{row}"] = f'=I{row}+J{row}-K{row}'
     add_validation(ws, "Pay Period Status", "F2:F100")
     add_validation(ws, "Payment Status", "G2:G100")
+    add_range_validation(ws, "Workers!$A$2:$A$200", "B2:B100")
     for row in range(2, ws.max_row + 1):
         ws[f"D{row}"].value = as_date(ws[f"D{row}"].value)
         ws[f"E{row}"].value = as_date(ws[f"E{row}"].value)
@@ -297,7 +316,8 @@ def build_worker_proof(ws):
     ws.merge_cells("A1:H1")
     labels = [
         ("A3", "Selected Worker ID"), ("A4", "Selected Pay Period ID"), ("A5", "Worker Name"),
-        ("A6", "Worker Status"), ("A7", "Date Range"), ("A8", "Payment Status"), ("A9", "Generated Timestamp")
+        ("A6", "Worker Status"), ("A7", "Date Range"), ("A8", "Payment Status"), ("A9", "Generated Timestamp"),
+        ("A10", "Proof Selector Check")
     ]
     for cell, label in labels:
         ws[cell] = label
@@ -309,6 +329,7 @@ def build_worker_proof(ws):
     ws["B7"] = '=IFERROR(TEXT(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,4,FALSE),"m/d/yyyy")&" to "&TEXT(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,5,FALSE),"m/d/yyyy"),"")'
     ws["B8"] = '=IFERROR(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,7,FALSE),"")'
     ws["B9"] = '=NOW()'
+    ws["B10"] = '=IFERROR(IF(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,2,FALSE)=$B$3,"OK - worker/pay period match","CHECK SELECTION - pay period belongs to another worker"),"CHECK SELECTION")'
     ws["B9"].number_format = "m/d/yyyy h:mm"
     add_validation(ws, "Payment Status", "B8")
     dv_worker = DataValidation(type="list", formula1="Workers!$A$2:$A$200", allow_blank=False)
@@ -319,14 +340,14 @@ def build_worker_proof(ws):
     for idx, header in enumerate(headers, 1):
         ws.cell(12, idx, header)
     header_style(ws, 12, 1, len(headers))
-    ws["A13"] = '=FILTER({\'Time Entries\'!A2:A200,\'Time Entries\'!F2:F200,\'Time Entries\'!D2:D200,\'Time Entries\'!E2:E200,\'Time Entries\'!J2:J200,\'Time Entries\'!K2:K200,\'Time Entries\'!L2:L200,\'Time Entries\'!M2:M200,\'Time Entries\'!N2:N200,\'Time Entries\'!O2:O200,\'Time Entries\'!P2:P200,\'Time Entries\'!S2:S200,\'Time Entries\'!T2:T200},\'Time Entries\'!B2:B200=$B$3,\'Time Entries\'!F2:F200>=VLOOKUP($B$4,\'Pay Periods\'!$A:$O,4,FALSE),\'Time Entries\'!F2:F200<=VLOOKUP($B$4,\'Pay Periods\'!$A:$O,5,FALSE))'
+    ws["A13"] = '=IF($B$10<>"OK - worker/pay period match","Check selected worker/pay period before printing proof",FILTER({\'Time Entries\'!A2:A200,\'Time Entries\'!F2:F200,\'Time Entries\'!D2:D200,\'Time Entries\'!E2:E200,\'Time Entries\'!J2:J200,\'Time Entries\'!K2:K200,\'Time Entries\'!L2:L200,\'Time Entries\'!M2:M200,\'Time Entries\'!N2:N200,\'Time Entries\'!O2:O200,\'Time Entries\'!P2:P200,\'Time Entries\'!S2:S200,\'Time Entries\'!T2:T200},\'Time Entries\'!B2:B200=$B$3,\'Time Entries\'!F2:F200>=VLOOKUP($B$4,\'Pay Periods\'!$A:$O,4,FALSE),\'Time Entries\'!F2:F200<=VLOOKUP($B$4,\'Pay Periods\'!$A:$O,5,FALSE)))'
     total_row = 30
     totals = [
-        ("A30", "Total Hours", "B30", '=IFERROR(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,8,FALSE),0)'),
-        ("A31", "Gross Pay", "B31", '=IFERROR(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,9,FALSE),0)'),
-        ("A32", "Reimbursements", "B32", '=IFERROR(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,10,FALSE),0)'),
-        ("A33", "Deductions", "B33", '=IFERROR(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,11,FALSE),0)'),
-        ("A34", "Net Pay", "B34", '=IFERROR(VLOOKUP($B$4,\'Pay Periods\'!$A:$O,12,FALSE),0)'),
+        ("A30", "Total Hours", "B30", '=IF($B$10<>"OK - worker/pay period match",0,SUMIFS(\'Time Entries\'!$J:$J,\'Time Entries\'!$B:$B,$B$3,\'Time Entries\'!$F:$F,">="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,4,FALSE),\'Time Entries\'!$F:$F,"<="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,5,FALSE),\'Time Entries\'!$P:$P,"<>Draft",\'Time Entries\'!$P:$P,"<>Rejected"))'),
+        ("A31", "Gross Pay", "B31", '=IF($B$10<>"OK - worker/pay period match",0,SUMIFS(\'Time Entries\'!$L:$L,\'Time Entries\'!$B:$B,$B$3,\'Time Entries\'!$F:$F,">="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,4,FALSE),\'Time Entries\'!$F:$F,"<="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,5,FALSE),\'Time Entries\'!$P:$P,"<>Draft",\'Time Entries\'!$P:$P,"<>Rejected"))'),
+        ("A32", "Reimbursements", "B32", '=IF($B$10<>"OK - worker/pay period match",0,SUMIFS(\'Time Entries\'!$M:$M,\'Time Entries\'!$B:$B,$B$3,\'Time Entries\'!$F:$F,">="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,4,FALSE),\'Time Entries\'!$F:$F,"<="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,5,FALSE),\'Time Entries\'!$P:$P,"<>Draft",\'Time Entries\'!$P:$P,"<>Rejected"))'),
+        ("A33", "Deductions", "B33", '=IF($B$10<>"OK - worker/pay period match",0,SUMIFS(\'Time Entries\'!$N:$N,\'Time Entries\'!$B:$B,$B$3,\'Time Entries\'!$F:$F,">="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,4,FALSE),\'Time Entries\'!$F:$F,"<="&VLOOKUP($B$4,\'Pay Periods\'!$A:$O,5,FALSE),\'Time Entries\'!$P:$P,"<>Draft",\'Time Entries\'!$P:$P,"<>Rejected"))'),
+        ("A34", "Net Pay", "B34", '=B31+B32-B33'),
     ]
     for label_cell, label, value_cell, formula in totals:
         ws[label_cell] = label
@@ -338,8 +359,16 @@ def build_worker_proof(ws):
     ws["D3"] = "Rule: Worker Proof is selected by one worker and one pay period only. It is print-ready and must not be replaced by crew-wide reports."
     ws["D3"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.merge_cells("D3:H6")
-    table_style(ws, 3, 9, 1, 2)
+    table_style(ws, 3, 10, 1, 2)
+    ws.conditional_formatting.add("A10:B10", FormulaRule(formula=['$B$10<>"OK - worker/pay period match"'], fill=PatternFill("solid", fgColor="F8D7DA")))
     set_widths(ws, {"A": 18, "B": 22, "C": 14, "D": 24, "E": 12, "F": 12, "G": 14, "H": 16, "I": 12, "J": 14, "K": 18, "L": 28, "M": 34})
+    ws.freeze_panes = "A12"
+    ws.print_title_rows = "1:12"
+    ws.print_area = "A1:M34"
+    ws.page_setup.orientation = "landscape"
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 1
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
 
 
 def build_dashboard(ws):
@@ -387,18 +416,57 @@ def build_dashboard(ws):
 
 def build_simple_logs(wb):
     append_table(wb["Proof Exports"], ["Export ID", "Worker ID", "Worker Name", "Pay Period ID", "Export Type", "Generated At", "Generated By", "Export Reference", "Notes"], PROOF_EXPORTS, {"A": 12, "B": 12, "C": 20, "D": 15, "E": 12, "F": 18, "G": 16, "H": 24, "I": 44})
+    add_range_validation(wb["Proof Exports"], "Workers!$A$2:$A$200", "B2:B100")
+    add_range_validation(wb["Proof Exports"], "'Pay Periods'!$A$2:$A$100", "D2:D100")
     add_validation(wb["Proof Exports"], "Export Type", "E2:E100")
     append_table(wb["Access Log"], ["Log ID", "Worker ID", "Worker Name", "Previous Status", "New Status", "Changed At", "Changed By", "Reason"], ACCESS_LOG, {"A": 12, "B": 12, "C": 20, "D": 16, "E": 16, "F": 18, "G": 16, "H": 46})
+    add_range_validation(wb["Access Log"], "Workers!$A$2:$A$200", "B2:B100")
     add_validation(wb["Access Log"], "Access Status", "D2:E100")
     append_table(wb["Correction Log"], ["Correction ID", "Entry ID", "Worker ID", "Worker Name", "Pay Period ID", "Correction Date", "Corrected By", "Correction Reason", "Original Value Summary", "New Value Summary", "Notes"], CORRECTION_LOG, {"A": 14, "B": 12, "C": 12, "D": 20, "E": 15, "F": 15, "G": 16, "H": 24, "I": 24, "J": 24, "K": 38})
+    add_range_validation(wb["Correction Log"], "'Time Entries'!$A$2:$A$200", "B2:B100")
+    add_range_validation(wb["Correction Log"], "Workers!$A$2:$A$200", "C2:C100")
+    add_range_validation(wb["Correction Log"], "'Pay Periods'!$A$2:$A$100", "E2:E100")
     append_table(wb["Schedule"], ["Schedule ID", "Job ID", "Job Name", "Worker ID", "Worker Name", "Scheduled Date", "Start Time", "End Time", "Schedule Status", "Calendar Event ID", "Notes"], SCHEDULE, {"A": 13, "B": 12, "C": 24, "D": 12, "E": 20, "F": 15, "G": 12, "H": 12, "I": 16, "J": 24, "K": 42})
+    add_range_validation(wb["Schedule"], "Jobs!$A$2:$A$200", "B2:B100")
+    add_range_validation(wb["Schedule"], "Workers!$A$2:$A$200", "D2:D100")
     add_validation(wb["Schedule"], "Schedule Status", "I2:I100")
     append_table(wb["Admin Notices"], ["Notice ID", "Created At", "Created By", "Recipient Type", "Worker ID", "Worker Name", "Subject", "Message", "Related Pay Period ID", "Delivery Method", "Notice Status", "Sent At", "Notes"], ADMIN_NOTICES, {"A": 12, "B": 18, "C": 16, "D": 20, "E": 12, "F": 20, "G": 24, "H": 44, "I": 20, "J": 16, "K": 15, "L": 18, "M": 38})
     add_validation(wb["Admin Notices"], "Recipient Type", "D2:D100")
+    add_range_validation(wb["Admin Notices"], "Workers!$A$2:$A$200", "E2:E100")
+    add_range_validation(wb["Admin Notices"], "'Pay Periods'!$A$2:$A$100", "I2:I100")
     add_validation(wb["Admin Notices"], "Delivery Method", "J2:J100")
     add_validation(wb["Admin Notices"], "Notice Status", "K2:K100")
     append_table(wb["Calendar Sync Log"], ["Calendar Log ID", "Job ID", "Job Name", "Worker ID", "Worker Name", "Calendar Event ID", "Event Date", "Sync Status", "Last Synced At", "Notes"], CALENDAR_SYNC, {"A": 16, "B": 12, "C": 24, "D": 12, "E": 20, "F": 24, "G": 14, "H": 16, "I": 18, "J": 44})
+    add_range_validation(wb["Calendar Sync Log"], "Jobs!$A$2:$A$200", "B2:B100")
+    add_range_validation(wb["Calendar Sync Log"], "Workers!$A$2:$A$200", "D2:D100")
     add_validation(wb["Calendar Sync Log"], "Sync Status", "H2:H100")
+
+    for row in range(2, wb["Proof Exports"].max_row + 1):
+        wb["Proof Exports"][f"F{row}"].value = as_datetime(wb["Proof Exports"][f"F{row}"].value)
+        wb["Proof Exports"][f"F{row}"].number_format = "m/d/yyyy h:mm"
+    for row in range(2, wb["Access Log"].max_row + 1):
+        wb["Access Log"][f"F{row}"].value = as_datetime(wb["Access Log"][f"F{row}"].value)
+        wb["Access Log"][f"F{row}"].number_format = "m/d/yyyy h:mm"
+    for row in range(2, wb["Correction Log"].max_row + 1):
+        wb["Correction Log"][f"F{row}"].value = as_date(wb["Correction Log"][f"F{row}"].value)
+        wb["Correction Log"][f"F{row}"].number_format = "m/d/yyyy"
+    for row in range(2, wb["Schedule"].max_row + 1):
+        wb["Schedule"][f"F{row}"].value = as_date(wb["Schedule"][f"F{row}"].value)
+        wb["Schedule"][f"G{row}"].value = as_time(wb["Schedule"][f"G{row}"].value)
+        wb["Schedule"][f"H{row}"].value = as_time(wb["Schedule"][f"H{row}"].value)
+        wb["Schedule"][f"F{row}"].number_format = "m/d/yyyy"
+        wb["Schedule"][f"G{row}"].number_format = "h:mm"
+        wb["Schedule"][f"H{row}"].number_format = "h:mm"
+    for row in range(2, wb["Admin Notices"].max_row + 1):
+        wb["Admin Notices"][f"B{row}"].value = as_datetime(wb["Admin Notices"][f"B{row}"].value)
+        wb["Admin Notices"][f"L{row}"].value = as_datetime(wb["Admin Notices"][f"L{row}"].value)
+        wb["Admin Notices"][f"B{row}"].number_format = "m/d/yyyy h:mm"
+        wb["Admin Notices"][f"L{row}"].number_format = "m/d/yyyy h:mm"
+    for row in range(2, wb["Calendar Sync Log"].max_row + 1):
+        wb["Calendar Sync Log"][f"G{row}"].value = as_date(wb["Calendar Sync Log"][f"G{row}"].value)
+        wb["Calendar Sync Log"][f"I{row}"].value = as_datetime(wb["Calendar Sync Log"][f"I{row}"].value)
+        wb["Calendar Sync Log"][f"G{row}"].number_format = "m/d/yyyy"
+        wb["Calendar Sync Log"][f"I{row}"].number_format = "m/d/yyyy h:mm"
 
 
 def build_workbook():
@@ -456,6 +524,8 @@ def audit(path):
         ("Pay Period formulas exist", has_formula(wb["Pay Periods"], "C2:L100")),
         ("Worker Proof formulas exist", has_formula(wb["Worker Proof"], "A13:M34")),
         ("Worker Proof selected worker selector exists", wb["Worker Proof"]["B3"].value == "W-1001"),
+        ("Worker Proof selector check exists", "worker/pay period match" in str(wb["Worker Proof"]["B10"].value)),
+        ("Worker Proof print area exists", bool(wb["Worker Proof"].print_area)),
         ("Schedule tab states not proof", "not proof" in str(wb["Schedule"]["K2"].value).lower()),
         ("Admin Notices tab states not chat/proof", "not chat" in str(wb["Admin Notices"]["M2"].value).lower()),
         ("active worker sample exists", any(row[4].value == "Active" for row in wb["Workers"].iter_rows(min_row=2, max_col=5))),
@@ -465,7 +535,7 @@ def audit(path):
         actual = [wb[sheet_name].cell(1, col).value for col in range(1, len(headers) + 1)]
         checks.append((f"{sheet_name} required headers exist", actual == headers))
     validation_count = sum(len(ws.data_validations.dataValidation) for ws in wb.worksheets)
-    checks.append(("data validation applied", validation_count >= 12))
+    checks.append(("data validation applied", validation_count >= 24))
     text = " ".join(str(cell.value).lower() for ws in wb.worksheets for row in ws.iter_rows() for cell in row if cell.value)
     forbidden = ["gmail.com", "outlook.com", "yahoo.com", "api key", "password", "token"]
     checks.append(("no real/private data strings", not any(term in text for term in forbidden)))
