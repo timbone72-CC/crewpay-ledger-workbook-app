@@ -31,6 +31,12 @@ SHEET_ORDER = [
     "Schedule",
     "Admin Notices",
     "Calendar Sync Log",
+    "App Config",
+    "Pending Worker Intake",
+    "Pending Pay Period Intake",
+    "Pending Time Entries",
+    "App Submission Log",
+    "Bridge Schema",
     "Dropdown Lists",
 ]
 
@@ -46,6 +52,8 @@ DROPDOWNS = {
     "Delivery Method": ["Workbook", "Email Ready", "Gmail Sent"],
     "Notice Status": ["Draft", "Posted", "Sent", "Archived"],
     "Sync Status": ["Not Synced", "Synced", "Failed", "Skipped"],
+    "Submission Status": ["Pending", "Reviewed", "Accepted", "Rejected"],
+    "Boolean Flag": ["TRUE", "FALSE"],
 }
 
 THEME = {
@@ -124,6 +132,44 @@ ADMIN_NOTICES = [
 
 CALENDAR_SYNC = [
     ["G-10001", "J-2001", "Oak Ridge Units", "W-1001", "Maya Ellis", "cal-demo-oak-001", "2026-06-11", "Not Synced", "", "Calendar is reference only, not proof."],
+]
+
+APP_CONFIG = [
+    ["Workbook Source Of Truth", "TRUE", "Workbook remains final authority."],
+    ["App Role", "Companion Input Layer", "App submits controlled intake records only."],
+    ["Backend Type", "Google Apps Script Web App", "No separate backend server/database."],
+    ["Endpoint URL", "PASTE_DEPLOYED_APPS_SCRIPT_WEB_APP_URL_HERE", "Set after Apps Script deployment."],
+    ["Bridge Enabled", "FALSE", "Turn TRUE only after deployment/testing."],
+    ["Shared Token Required", "TRUE", "Browser-visible token is not full security; use private/demo boundary."],
+    ["Intake Review Required", "TRUE", "App submissions should be reviewed before final record use."],
+]
+
+PENDING_WORKER_INTAKE = [
+    ["PW-0001", "2026-06-10 09:00", "App Demo", "Pending", "W-001", "Sample Worker", "Active", "Crew", "sample@example.com", "Sample pending worker intake row.", "", "", ""],
+]
+
+PENDING_PAY_PERIOD_INTAKE = [
+    ["PP-0001", "2026-06-10 09:05", "App Demo", "Pending", "PP-001", "W-001", "Sample Worker", "2026-06-01", "2026-06-07", "2026-06-14", "Sample pending pay period row.", "", "", ""],
+]
+
+PENDING_TIME_ENTRIES = [
+    ["PT-0001", "2026-06-10 09:10", "App Demo", "Pending", "E-001", "W-001", "Sample Worker", "PP-001", "2026-06-03", "Sample Work", 8, 25, "=K2*L2", "Sample pending time entry row.", "", "", ""],
+]
+
+APP_SUBMISSION_LOG = [
+    ["AL-0001", "2026-06-10 09:15", "healthCheck", "App Demo", "OK", "", "", "", "Sample app submission log row.", "Sample only.", "Not deployed"],
+]
+
+BRIDGE_SCHEMA = [
+    ["healthCheck", "App Submission Log", "action", "client_version, submission_source", '{ok:true, action:"healthCheck", workbook:"CrewPay Ledger"}', "Bridge disabled; workbook unavailable", "Readiness check only; may log a health check row if desired."],
+    ["getWorkbookSchema", "Bridge Schema / Dropdown Lists", "action", "schema_version", "{ok:true, config:{...}, dropdowns:{...}}", "Bridge disabled; schema unavailable", "Return allowed tabs, writable fields, and dropdown values."],
+    ["submitWorkerIntake", "Pending Worker Intake", "worker_name, access_status, role_trade, contact", "worker_id, notes, idempotency_key", "{ok:true, intake_id:'PW-####'}", "Missing required field; duplicate submission; invalid access status", "First landing zone for worker records from the app."],
+    ["submitPayPeriod", "Pending Pay Period Intake", "pay_period_id, worker_id, period_start, period_end", "worker_name, pay_date, notes, idempotency_key", "{ok:true, intake_id:'PP-####'}", "Invalid date range; missing worker; duplicate submission", "Pending setup only. Final Pay Periods tab remains workbook/admin reviewed."],
+    ["submitTimeEntry", "Pending Time Entries", "worker_id, pay_period_id, work_date, job_work_type, hours, rate", "worker_name, entry_id, notes, idempotency_key", "{ok:true, intake_id:'PT-####'}", "Inactive worker; invalid hours/rate; duplicate submission", "Safest first write target for app time entries."],
+    ["logProofExport", "Proof Exports", "worker_id, pay_period_id, export_type, export_reference", "worker_name, notes", "{ok:true, export_id:'X-####'}", "Worker/pay period mismatch; invalid export type", "Do not write Worker Proof directly."],
+    ["logCorrection", "Correction Log", "entry_id, worker_id, pay_period_id, correction_reason, original_value_summary, new_value_summary", "worker_name, notes", "{ok:true, correction_id:'C-####'}", "Missing proof context; duplicate correction", "Corrections must be visible, not silent."],
+    ["logAccessChange", "Access Log", "worker_id, previous_status, new_status, reason", "worker_name", "{ok:true, log_id:'A-####'}", "Invalid status; missing reason", "Future access changes must preserve historical proof."],
+    ["createAdminNotice", "Admin Notices", "recipient_type, subject, message", "worker_id, worker_name, related_pay_period_id, notes", "{ok:true, notice_id:'N-####'}", "Invalid recipient type; missing message", "Creates a one-way notice row only; sending is separate."],
 ]
 
 
@@ -283,16 +329,16 @@ def build_dropdowns(ws):
             ws.cell(row_idx, col_idx, value)
     header_style(ws)
     table_style(ws, 1, ws.max_row, 1, ws.max_column)
-    ws["M1"] = "Demo Config"
-    ws["M2"] = "Support/config tab for demo dropdowns. Not part of the public workflow."
-    ws["M1"].font = Font(bold=True, color="FFFFFF")
-    ws["M1"].fill = PatternFill("solid", fgColor=THEME["navy"])
-    ws["M2"].fill = PatternFill("solid", fgColor=THEME["yellow"])
-    ws["M2"].alignment = Alignment(wrap_text=True, vertical="top")
-    ws["M1"].border = THIN_BORDER
-    ws["M2"].border = THIN_BORDER
+    ws["O1"] = "Demo Config"
+    ws["O2"] = "Support/config tab for demo dropdowns. Not part of the public workflow."
+    ws["O1"].font = Font(bold=True, color="FFFFFF")
+    ws["O1"].fill = PatternFill("solid", fgColor=THEME["navy"])
+    ws["O2"].fill = PatternFill("solid", fgColor=THEME["yellow"])
+    ws["O2"].alignment = Alignment(wrap_text=True, vertical="top")
+    ws["O1"].border = THIN_BORDER
+    ws["O2"].border = THIN_BORDER
     set_widths(ws, {get_column_letter(i): 22 for i in range(1, len(DROPDOWNS) + 1)})
-    ws.column_dimensions["M"].width = 42
+    ws.column_dimensions["O"].width = 42
     ws.freeze_panes = "A2"
 
 
@@ -683,6 +729,88 @@ def build_simple_logs(wb):
         wb["Calendar Sync Log"][f"I{row}"].number_format = "m/d/yyyy h:mm"
 
 
+def build_bridge_tabs(wb):
+    append_table(
+        wb["App Config"],
+        ["Config Key", "Config Value", "Notes"],
+        APP_CONFIG,
+        {"A": 28, "B": 44, "C": 58},
+    )
+    add_validation(wb["App Config"], "Boolean Flag", "B2")
+    add_validation(wb["App Config"], "Boolean Flag", "B6:B8")
+    card(
+        wb["App Config"],
+        1,
+        5,
+        4,
+        4,
+        "Bridge boundary",
+        "The workbook remains source of truth. The app may submit controlled intake records through Apps Script after deployment.",
+        THEME["blue_2"],
+    )
+
+    append_table(
+        wb["Pending Worker Intake"],
+        ["Intake ID", "Submitted At", "Submission Source", "Submission Status", "Worker ID", "Worker Name", "Access Status", "Role / Trade", "Contact", "Notes", "Reviewed At", "Reviewed By", "Review Notes"],
+        PENDING_WORKER_INTAKE,
+        {"A": 13, "B": 18, "C": 18, "D": 18, "E": 12, "F": 22, "G": 15, "H": 18, "I": 24, "J": 36, "K": 18, "L": 18, "M": 36},
+    )
+    add_validation(wb["Pending Worker Intake"], "Submission Status", "D2:D200")
+    add_validation(wb["Pending Worker Intake"], "Access Status", "G2:G200")
+    add_status_formatting(wb["Pending Worker Intake"], "A2:M200", "D")
+
+    append_table(
+        wb["Pending Pay Period Intake"],
+        ["Intake ID", "Submitted At", "Submission Source", "Submission Status", "Pay Period ID", "Worker ID", "Worker Name", "Period Start", "Period End", "Pay Date", "Notes", "Reviewed At", "Reviewed By", "Review Notes"],
+        PENDING_PAY_PERIOD_INTAKE,
+        {"A": 13, "B": 18, "C": 18, "D": 18, "E": 16, "F": 12, "G": 22, "H": 14, "I": 14, "J": 14, "K": 36, "L": 18, "M": 18, "N": 36},
+    )
+    add_validation(wb["Pending Pay Period Intake"], "Submission Status", "D2:D200")
+    add_status_formatting(wb["Pending Pay Period Intake"], "A2:N200", "D")
+
+    append_table(
+        wb["Pending Time Entries"],
+        ["Intake ID", "Submitted At", "Submission Source", "Submission Status", "Entry ID", "Worker ID", "Worker Name", "Pay Period ID", "Work Date", "Job / Work Type", "Hours", "Rate", "Amount", "Notes", "Reviewed At", "Reviewed By", "Review Notes"],
+        PENDING_TIME_ENTRIES,
+        {"A": 13, "B": 18, "C": 18, "D": 18, "E": 12, "F": 12, "G": 22, "H": 15, "I": 14, "J": 24, "K": 10, "L": 12, "M": 14, "N": 36, "O": 18, "P": 18, "Q": 36},
+    )
+    add_validation(wb["Pending Time Entries"], "Submission Status", "D2:D200")
+    add_status_formatting(wb["Pending Time Entries"], "A2:Q200", "D")
+
+    append_table(
+        wb["App Submission Log"],
+        ["Log ID", "Submitted At", "Action", "Submission Source", "Status", "Related Intake ID", "Related Worker ID", "Related Pay Period ID", "Message", "Raw Payload Summary", "Handled By Script Version"],
+        APP_SUBMISSION_LOG,
+        {"A": 12, "B": 18, "C": 24, "D": 18, "E": 14, "F": 18, "G": 18, "H": 20, "I": 34, "J": 34, "K": 24},
+    )
+
+    append_table(
+        wb["Bridge Schema"],
+        ["Action", "Target Tab", "Required Fields", "Optional Fields", "Success Response", "Error Conditions", "Notes"],
+        BRIDGE_SCHEMA,
+        {"A": 24, "B": 26, "C": 48, "D": 38, "E": 38, "F": 42, "G": 48},
+    )
+
+    for ws_name in ["Pending Worker Intake", "Pending Pay Period Intake", "Pending Time Entries", "App Submission Log"]:
+        ws = wb[ws_name]
+        for row in range(2, ws.max_row + 1):
+            if ws.max_column >= 2 and ws[f"B{row}"].value:
+                ws[f"B{row}"].value = as_datetime(ws[f"B{row}"].value)
+                ws[f"B{row}"].number_format = "m/d/yyyy h:mm"
+        if ws_name == "Pending Pay Period Intake":
+            for row in range(2, ws.max_row + 1):
+                for col in ["H", "I", "J"]:
+                    ws[f"{col}{row}"].value = as_date(ws[f"{col}{row}"].value)
+                    ws[f"{col}{row}"].number_format = "m/d/yyyy"
+        if ws_name == "Pending Time Entries":
+            for row in range(2, ws.max_row + 1):
+                ws[f"I{row}"].value = as_date(ws[f"I{row}"].value)
+                ws[f"I{row}"].number_format = "m/d/yyyy"
+                ws[f"K{row}"].number_format = "0.00"
+                ws[f"L{row}"].number_format = "$#,##0.00"
+                ws[f"M{row}"].number_format = "$#,##0.00"
+
+
 def build_workbook():
     wb = Workbook()
     for sheet in SHEET_ORDER[1:]:
@@ -699,6 +827,7 @@ def build_workbook():
     build_access_status_demo(wb["Access Status Demo"])
     build_workflow_demo(wb["Workflow Demo"])
     build_simple_logs(wb)
+    build_bridge_tabs(wb)
     build_dropdowns(wb["Dropdown Lists"])
 
     # Format date/time columns in simple logs.
@@ -729,11 +858,17 @@ def audit(path):
         "Schedule": ["Schedule ID", "Job ID", "Job Name", "Worker ID", "Worker Name", "Scheduled Date", "Start Time", "End Time", "Schedule Status", "Calendar Event ID", "Notes"],
         "Admin Notices": ["Notice ID", "Created At", "Created By", "Recipient Type", "Worker ID", "Worker Name", "Subject", "Message", "Related Pay Period ID", "Delivery Method", "Notice Status", "Sent At", "Notes"],
         "Calendar Sync Log": ["Calendar Log ID", "Job ID", "Job Name", "Worker ID", "Worker Name", "Calendar Event ID", "Event Date", "Sync Status", "Last Synced At", "Notes"],
+        "App Config": ["Config Key", "Config Value", "Notes"],
+        "Pending Worker Intake": ["Intake ID", "Submitted At", "Submission Source", "Submission Status", "Worker ID", "Worker Name", "Access Status", "Role / Trade", "Contact", "Notes", "Reviewed At", "Reviewed By", "Review Notes"],
+        "Pending Pay Period Intake": ["Intake ID", "Submitted At", "Submission Source", "Submission Status", "Pay Period ID", "Worker ID", "Worker Name", "Period Start", "Period End", "Pay Date", "Notes", "Reviewed At", "Reviewed By", "Review Notes"],
+        "Pending Time Entries": ["Intake ID", "Submitted At", "Submission Source", "Submission Status", "Entry ID", "Worker ID", "Worker Name", "Pay Period ID", "Work Date", "Job / Work Type", "Hours", "Rate", "Amount", "Notes", "Reviewed At", "Reviewed By", "Review Notes"],
+        "App Submission Log": ["Log ID", "Submitted At", "Action", "Submission Source", "Status", "Related Intake ID", "Related Worker ID", "Related Pay Period ID", "Message", "Raw Payload Summary", "Handled By Script Version"],
+        "Bridge Schema": ["Action", "Target Tab", "Required Fields", "Optional Fields", "Success Response", "Error Conditions", "Notes"],
         "Dropdown Lists": list(DROPDOWNS.keys()),
     }
     checks = [
         ("workbook file exists", path.exists()),
-        ("exactly 16 tabs", len(wb.sheetnames) == 16),
+        ("exactly 22 tabs", len(wb.sheetnames) == 22),
         ("tab order matches prompt", wb.sheetnames == SHEET_ORDER),
         ("Dashboard formulas exist", has_formula(wb["Dashboard"], "A5:H8")),
         ("Time Entries formulas exist", has_formula(wb["Time Entries"], "C2:O200")),
@@ -753,8 +888,10 @@ def audit(path):
     validation_count = sum(len(ws.data_validations.dataValidation) for ws in wb.worksheets)
     checks.append(("data validation applied", validation_count >= 24))
     text = " ".join(str(cell.value).lower() for ws in wb.worksheets for row in ws.iter_rows() for cell in row if cell.value)
-    forbidden = ["gmail.com", "outlook.com", "yahoo.com", "api key", "password", "token"]
+    forbidden = ["gmail.com", "outlook.com", "yahoo.com", "api key", "password", "secret=", "bearer "]
     checks.append(("no real/private data strings", not any(term in text for term in forbidden)))
+    checks.append(("App Config bridge disabled by default", wb["App Config"]["B6"].value == "FALSE"))
+    checks.append(("Pending Time Entries amount formula exists", str(wb["Pending Time Entries"]["M2"].value).startswith("=")))
     passed = all(result for _, result in checks)
     print("CrewPay Ledger workbook audit")
     print(f"Output file path: {path}")
