@@ -24,6 +24,32 @@ The workbook should hold:
 - Access Log
 - Calendar Sync Log, if calendar sync is added later
 
+## Level 1.5 Automation Layer
+
+Level 1.5 may add free Google Apps Script helpers while keeping the workbook as the source of truth.
+
+Level 1.5 can include:
+- Workbook menu buttons
+- Worker proof generation helpers
+- CSV or PDF export helpers
+- Email-ready notice generation
+- Optional Gmail sending from the admin account
+- Optional Google Calendar event creation or update
+- Calendar Sync Log updates
+- Admin Companion app bridge to workbook records
+- Worker Field Timesheet bridge to workbook records later
+
+Level 1.5 must not require:
+- Paid APIs
+- A backend server
+- A real database
+- Worker accounts
+- Enterprise permissions
+- Full payroll automation
+
+Level 1.5 rule:
+The workbook remains the ledger. Apps Script is only a helper layer.
+
 ## Current App Role
 
 The current local app should be treated as:
