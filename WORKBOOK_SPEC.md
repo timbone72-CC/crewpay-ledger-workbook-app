@@ -54,8 +54,10 @@ The workbook must still work manually if Apps Script is removed or disabled.
 8. Proof Exports
 9. Access Log
 10. Correction Log
-11. Calendar Sync Log
-12. Dropdown Lists
+11. Schedule
+12. Admin Notices
+13. Calendar Sync Log
+14. Dropdown Lists
 
 ## Tab Details
 
@@ -267,6 +269,71 @@ Columns:
 - New Value Summary
 - Notes
 
+### Schedule
+
+Purpose:
+Track scheduled work without making Google Calendar the source of truth.
+
+Columns:
+- Schedule ID
+- Job ID
+- Job Name
+- Worker ID
+- Worker Name
+- Scheduled Date
+- Start Time
+- End Time
+- Schedule Status
+- Calendar Event ID
+- Notes
+
+Schedule Status values:
+- Planned
+- Scheduled
+- Completed
+- Canceled
+
+Rule:
+Schedule records are planning records. Time Entries and Pay Periods remain the proof source.
+
+### Admin Notices
+
+Purpose:
+Track admin-to-worker or admin-to-all notices without building chat.
+
+Columns:
+- Notice ID
+- Created At
+- Created By
+- Recipient Type
+- Worker ID
+- Worker Name
+- Subject
+- Message
+- Related Pay Period ID
+- Delivery Method
+- Notice Status
+- Sent At
+- Notes
+
+Recipient Type values:
+- Worker
+- All Active Workers
+
+Delivery Method values:
+- Workbook
+- Email Ready
+- Gmail Sent
+
+Notice Status values:
+- Draft
+- Posted
+- Sent
+- Archived
+
+Rule:
+Admin Notices are one-way admin notices only. They are not chat, worker-to-worker messaging, or proof.
+
 ### Calendar Sync Log
 
 Purpose:
@@ -299,4 +366,8 @@ Lists:
 - Pay Period Status
 - Payment Status
 - Export Type
+- Schedule Status
+- Recipient Type
+- Delivery Method
+- Notice Status
 - Sync Status
