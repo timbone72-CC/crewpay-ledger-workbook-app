@@ -11,8 +11,25 @@ Core goals:
 - Preserve a clean migration path to Level 2 where the app/database becomes the source of truth and Google Sheets becomes export/report only.
 
 Current build direction:
-- Level 1: simple, free/low-cost, likely Google Sheets-backed.
+- Level 1: workbook-first, simple, free/low-cost, Google Sheets-friendly source of truth.
 - Level 2: app/database-backed source of truth with better access control and privacy boundaries.
+
+## Level 1 Workbook
+
+The Level 1 source of truth is the CrewPay Ledger Workbook. The local app in this repo is optional
+and is not required to use the workbook.
+
+Rebuild the workbook:
+
+```bash
+python3 build_crewpay_ledger_workbook.py
+```
+
+Output:
+
+```text
+CrewPay_Ledger_Workbook.xlsx
+```
 
 ## MVP Build
 

@@ -6,6 +6,7 @@ Current safe state:
 - Planning files created and committed.
 - Codex MVP build prompt created and committed.
 - First local-first MVP app code has been generated.
+- Level 1 CrewPay Ledger Workbook generator and workbook have been generated.
 
 Project files:
 - README.md
@@ -14,10 +15,10 @@ Project files:
 - CODEX_BUILD_PROMPT.md
 
 Current purpose:
-Validate and iterate on the first CrewPay Ledger MVP build.
+Validate the workbook-first Level 1 ledger and keep the local app optional.
 
 Next intended action:
-Run the local MVP, review the worker-proof flow, and tighten only MVP-critical gaps.
+Review `CrewPay_Ledger_Workbook.xlsx` in Excel or Google Sheets and tighten only workbook-critical gaps.
 
 Critical reminder:
 CrewPay Ledger must protect worker proof even when admin access is removed.
@@ -30,3 +31,4 @@ Gap fix added:
 - Proof timestamp/version rule clarified.
 - Worker-only proof export privacy rule clarified.
 - MVP app code added with dependency-free acceptance tests.
+- Workbook-first source-of-truth build added with workbook audit and acceptance documentation.
