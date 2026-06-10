@@ -33,4 +33,7 @@ Non-negotiable requirements:
 Current status:
 - Local workspace created at ~/projects/crewpay-ledger.
 - README.md created.
-- No app code has been generated yet.
+- First local-first MVP app has been generated.
+- MVP uses plain HTML/CSS/JavaScript, browser localStorage, sample data, and dependency-free Node acceptance tests.
+- MVP includes worker/job/time-entry/pay-period views, inactive-worker blocking for new entries, worker-only proof view, printable proof, and worker-only CSV proof export.
+- No login/auth, backend database, cloud storage, email delivery, GPS, payroll tax logic, HR compliance logic, messaging, notifications, Google Sheets API, or Apps Script has been added.

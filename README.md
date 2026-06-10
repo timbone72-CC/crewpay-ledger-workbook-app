@@ -13,3 +13,45 @@ Core goals:
 Current build direction:
 - Level 1: simple, free/low-cost, likely Google Sheets-backed.
 - Level 2: app/database-backed source of truth with better access control and privacy boundaries.
+
+## MVP Build
+
+This repo now includes a small local-first MVP built with plain HTML, CSS, and JavaScript.
+
+### Run locally
+
+Open `index.html` in a browser, or serve the folder with any static file server:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open:
+
+```text
+http://localhost:8000/
+```
+
+### Run acceptance tests
+
+```bash
+node tests/acceptance.test.js
+```
+
+### What the MVP demonstrates
+
+- sample workers, jobs, time entries, and pay periods
+- active/inactive worker access status
+- inactive workers blocked from new time entries
+- historical inactive-worker records preserved for proof
+- pay-period totals for hours, gross pay, reimbursements, deductions, and net pay
+- Open / Finalized / Paid pay-period states
+- worker-only printable proof view
+- worker-only CSV proof export
+- generated proof timestamp and export history record
+
+### Intentional MVP boundaries
+
+This MVP does not include login/authentication, a real database, cloud storage, email delivery,
+GPS/location tracking, payroll tax logic, HR compliance logic, messaging, notifications, Google
+Sheets API, Apps Script, or a full payroll system.

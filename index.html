@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CrewPay Ledger MVP</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">CrewPay Ledger MVP</p>
+        <h1>Timesheets, pay-period totals, and worker proof that survives inactive access.</h1>
+        <p>
+          A small local-first proof-of-concept for crews, workers, and admins. This MVP uses sample
+          data and browser storage only. It does not include login, payroll tax logic, cloud storage,
+          email delivery, GPS, messaging, notifications, or a backend database.
+        </p>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="MVP sections">
+      <button class="nav-button active" data-section="dashboard">Dashboard</button>
+      <button class="nav-button" data-section="workers">Workers</button>
+      <button class="nav-button" data-section="jobs">Jobs</button>
+      <button class="nav-button" data-section="time">Time Entries</button>
+      <button class="nav-button" data-section="periods">Pay Periods</button>
+      <button class="nav-button" data-section="proof">Worker Proof</button>
+      <button class="nav-button" data-section="access">Access Model</button>
+    </nav>
+
+    <main id="app" aria-live="polite"></main>
+
+    <script src="./src/ledger-core.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

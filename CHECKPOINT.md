@@ -5,7 +5,7 @@ Current safe state:
 - Git repository initialized.
 - Planning files created and committed.
 - Codex MVP build prompt created and committed.
-- No app code has been generated yet.
+- First local-first MVP app code has been generated.
 
 Project files:
 - README.md
@@ -14,10 +14,10 @@ Project files:
 - CODEX_BUILD_PROMPT.md
 
 Current purpose:
-Prepare CrewPay Ledger for a first MVP build.
+Validate and iterate on the first CrewPay Ledger MVP build.
 
 Next intended action:
-Give CODEX_BUILD_PROMPT.md to Codex and have it build the first local MVP.
+Run the local MVP, review the worker-proof flow, and tighten only MVP-critical gaps.
 
 Critical reminder:
 CrewPay Ledger must protect worker proof even when admin access is removed.
@@ -29,4 +29,4 @@ Gap fix added:
 - Pay-period finalization rule clarified.
 - Proof timestamp/version rule clarified.
 - Worker-only proof export privacy rule clarified.
-- No app code added.
+- MVP app code added with dependency-free acceptance tests.
