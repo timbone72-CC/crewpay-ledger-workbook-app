@@ -7,6 +7,7 @@ Current safe state:
 - Codex MVP build prompt created and committed.
 - First local-first MVP app code has been generated.
 - Level 1 CrewPay Ledger Workbook generator and workbook have been generated.
+- Level 1.5 Phase 1 Apps Script helper files have been generated.
 
 Project files:
 - README.md
@@ -18,7 +19,7 @@ Current purpose:
 Validate the workbook-first Level 1 ledger and keep the local app optional.
 
 Next intended action:
-Review `CrewPay_Ledger_Workbook.xlsx` in Excel or Google Sheets and tighten only workbook-critical gaps.
+Install `apps_script/Code.gs` in a copy of the Google Sheets workbook and manually test the Phase 1 menu helpers.
 
 Critical reminder:
 CrewPay Ledger must protect worker proof even when admin access is removed.
@@ -33,3 +34,4 @@ Gap fix added:
 - MVP app code added with dependency-free acceptance tests.
 - Workbook-first source-of-truth build added with workbook audit and acceptance documentation.
 - Workbook revision tightened Worker Proof selector guard, print setup, worker-specific totals, ID dropdown validation, inactive-worker row flagging, and helper-ready log formatting.
+- Apps Script Phase 1 helper layer added for menu actions, proof refresh, proof/access/correction logging, and email-ready notice text only.

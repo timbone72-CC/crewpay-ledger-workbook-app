@@ -31,6 +31,16 @@ Output:
 CrewPay_Ledger_Workbook.xlsx
 ```
 
+## Optional Apps Script Helpers
+
+Phase 1 optional Google Apps Script helpers live in `apps_script/`.
+
+These helpers add a custom workbook menu, worker proof refresh, proof export logging, access change
+logging, correction logging, and email-ready notice text. They do not send Gmail, sync Google
+Calendar, use paid APIs, add a backend, or replace the workbook as the source of truth.
+
+Install instructions are in `apps_script/README.md`.
+
 ## MVP Build
 
 This repo now includes a small local-first MVP built with plain HTML, CSS, and JavaScript.

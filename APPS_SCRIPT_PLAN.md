@@ -45,6 +45,9 @@ Build first:
 Reason:
 These improve the workbook without needing Gmail, Calendar, backend, or paid services.
 
+Status:
+Built in `apps_script/Code.gs`. Phase 1 remains optional; the workbook still works manually without Apps Script.
+
 ### Phase 2 — File Export Helpers
 
 Build after Phase 1 works:
@@ -64,6 +67,16 @@ Reason:
 These touch account permissions and can increase setup complexity.
 
 ## Proposed Custom Menu
+
+Current Phase 1 menu:
+- Generate Worker Proof
+- Log Proof Export
+- Log Access Change
+- Log Correction
+- Create Email-Ready Notice
+- About CrewPay Ledger
+
+Future expanded menu candidates:
 
 Menu name:
 CrewPay Ledger
