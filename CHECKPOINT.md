@@ -22,3 +22,11 @@ Give CODEX_BUILD_PROMPT.md to Codex and have it build the first local MVP.
 Critical reminder:
 CrewPay Ledger must protect worker proof even when admin access is removed.
 Inactive workers should lose future-use access, not historical proof.
+
+Gap fix added:
+- Worker-owned proof/export rule clarified.
+- Inactive worker correction rule clarified.
+- Pay-period finalization rule clarified.
+- Proof timestamp/version rule clarified.
+- Worker-only proof export privacy rule clarified.
+- No app code added.

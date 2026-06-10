@@ -34,6 +34,35 @@ The MVP must show a worker-proof model where:
 - Pay-period proof can be generated per worker.
 - The data model can migrate later to an app/database source of truth.
 
+## Minimal Gap-Fix Rules
+
+Do not add a large permissions system, authentication, email delivery, cloud storage, signatures, GPS, payroll tax logic, or database.
+
+Implement only the minimal proof/access rules:
+
+1. Worker proof ownership
+   - Worker proof must be printable.
+   - Worker-specific CSV export is preferred if practical.
+   - Proof must include worker, date range, entries, totals, payment status, and generated/export timestamp.
+
+2. Inactive worker behavior
+   - Inactive workers cannot be selected for new time entries.
+   - Inactive workers remain visible in history/proof.
+   - Admins may still approve, correct, mark paid, or regenerate proof for old records.
+
+3. Pay period status
+   - Include a simple Open / Finalized / Paid status if practical.
+   - Finalized or paid records should not be silently changed.
+   - Corrections after finalization should be visible.
+
+4. Proof versioning
+   - Proof must show generated/export timestamp.
+   - Do not add cryptographic hashes.
+
+5. Export privacy
+   - Worker proof view and worker CSV export must show one selected worker only.
+   - Do not replace worker proof with only a crew-wide admin report.
+
 ## Build Type
 
 Create a simple local-first web app unless the existing repo files clearly point to a better approach.

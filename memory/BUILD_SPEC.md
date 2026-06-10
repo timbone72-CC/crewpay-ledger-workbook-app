@@ -77,6 +77,66 @@ Expected direction:
 - Migration path must be protected from the first build.
 - Avoid locking the whole product into a spreadsheet-only design.
 
+## Minimal Proof and Access Rules
+
+These rules are required for the MVP and should not become a large permissions system.
+
+### Worker Proof Ownership
+
+The MVP must provide worker-owned proof through export or print.
+
+Minimum acceptable proof:
+- A worker-specific printable proof view.
+- A worker-specific CSV export if practical.
+- Proof must include worker name, date range, entries, totals, payment status, and export timestamp.
+
+The MVP does not need email delivery, cloud storage, signatures, or worker accounts.
+
+### Inactive Worker Rule
+
+Inactive worker status means:
+- The worker cannot be selected for new time entries.
+- The worker's historical records remain visible.
+- Admins may still approve pending old entries.
+- Admins may still correct old entries when needed.
+- Admins may still mark old pay periods paid.
+- Admins may still regenerate worker proof.
+
+Inactive status blocks future work entry. It does not erase or hide past proof.
+
+### Pay Period Finalization Rule
+
+A pay period should support a simple status:
+- Open
+- Finalized
+- Paid
+
+Minimum behavior:
+- Open pay periods can still change.
+- Finalized or paid pay periods should be treated as historical proof.
+- If edits are allowed after finalization, the app should make the correction visible instead of silently changing proof.
+
+The MVP does not need complex payroll locking.
+
+### Proof Version Rule
+
+Every generated proof view or export should show:
+- Worker
+- Date range
+- Export/generated timestamp
+- Whether the proof is current, finalized, or paid if that status exists
+
+The MVP does not need cryptographic hashes.
+
+### Export Privacy Rule
+
+Worker proof exports must be worker-only by default.
+
+Minimum behavior:
+- Worker proof view shows one selected worker only.
+- Worker CSV export includes one selected worker only.
+- Crew-wide admin reports are optional and should not replace worker-specific proof.
+
 ## MVP Scope
 
 The first working version should focus on:
