@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CrewPay Admin App | CrewPay Ledger</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">CrewPay Admin App</p>
+        <h1>No-backend admin control panel for a workbook-first CrewPay Ledger.</h1>
+        <p>
+          This admin companion can submit controlled intake records through Google Apps Script into
+          workbook pending tabs. The workbook remains the source of truth and final record authority.
+          The app has no separate backend, database, worker login, payroll tax logic, HR system, or banking workflow.
+        </p>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="MVP sections">
+      <button class="nav-button active" data-section="dashboard">Dashboard</button>
+      <button class="nav-button" data-section="workers">Workers</button>
+      <button class="nav-button" data-section="jobs">Jobs</button>
+      <button class="nav-button" data-section="time">Time Entries</button>
+      <button class="nav-button" data-section="periods">Pay Periods</button>
+      <button class="nav-button" data-section="proof">Worker Proof</button>
+      <button class="nav-button" data-section="bridge">Workbook Bridge</button>
+      <button class="nav-button" data-section="access">Access Model</button>
+    </nav>
+
+    <main id="app" aria-live="polite"></main>
+
+    <script src="./src/ledger-core.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
