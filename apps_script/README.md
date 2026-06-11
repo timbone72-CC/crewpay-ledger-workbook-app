@@ -47,7 +47,7 @@ The no-backend admin app bridge is intentionally isolated in:
 
 `apps_script/CrewPay_Ledger_BRIDGE.gs`
 
-That file contains the Web App endpoint for admin app submissions to pending workbook intake tabs. It is separate from the workbook-helper script in `apps_script/Code.gs` and separate from the preserved original final helper script. See `BRIDGE_SETUP.md` for deployment and token setup.
+That file contains the Web App endpoint for admin app submissions to pending workbook intake tabs. It also contains `installCrewPayBridgeTabs` and `debugCrewPayBridgeWorkbook` so a deployed workbook can create/verify the required bridge tabs. It is separate from the workbook-helper script in `apps_script/Code.gs` and separate from the preserved original final helper script. See `BRIDGE_SETUP.md` for deployment, tab installation, redeployment, and token setup.
 
 ## Manual Install
 

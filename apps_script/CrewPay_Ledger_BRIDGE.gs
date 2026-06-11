@@ -37,6 +37,165 @@ var CP_BRIDGE = {
   ]
 };
 
+
+var CP_BRIDGE_REQUIRED_TABS = [
+  {
+    name: 'App Submission Log',
+    headers: ['Log ID', 'Submitted At', 'Action', 'Submission Source', 'Status', 'Related Intake ID', 'Related Worker ID', 'Related Pay Period ID', 'Message', 'Raw Payload Summary', 'Handled By Script Version']
+  },
+  {
+    name: 'Pending Worker Intake',
+    headers: ['Intake ID', 'Submitted At', 'Submission Source', 'Submission Status', 'Worker ID', 'Worker Name', 'Access Status', 'Role / Trade', 'Contact', 'Notes', 'Reviewed At', 'Reviewed By', 'Review Notes']
+  },
+  {
+    name: 'Pending Pay Period Intake',
+    headers: ['Intake ID', 'Submitted At', 'Submission Source', 'Submission Status', 'Pay Period ID', 'Worker ID', 'Worker Name', 'Period Start', 'Period End', 'Pay Date', 'Notes', 'Reviewed At', 'Reviewed By', 'Review Notes']
+  },
+  {
+    name: 'Pending Time Entries',
+    headers: ['Intake ID', 'Submitted At', 'Submission Source', 'Submission Status', 'Entry ID', 'Worker ID', 'Worker Name', 'Pay Period ID', 'Work Date', 'Job / Work Type', 'Hours', 'Rate', 'Amount', 'Notes', 'Reviewed At', 'Reviewed By', 'Review Notes']
+  },
+  {
+    name: 'Bridge Schema',
+    headers: ['Action', 'Target Tab', 'Required Fields', 'Optional Fields', 'Success Response', 'Error Conditions', 'Notes']
+  }
+];
+
+var CP_BRIDGE_SCHEMA_SEED_ROWS = [
+  ['healthCheck', 'App Submission Log', 'action', 'clientId, payload', 'status success with bridge metadata', 'Bridge unavailable', 'GET does not write; POST may log health telemetry.'],
+  ['testWriteAccess', 'App Submission Log', 'token, action', 'clientId, payload', 'status success after log row append', 'Missing token or missing log tab', 'Writes a permanent audit row.'],
+  ['getPendingSummary', 'counts only', 'token, action', 'clientId', 'status success with pending counts', 'Missing token or missing pending tabs', 'Returns counts only, not row data.'],
+  ['getWorkbookSchema', 'Bridge Schema', 'token, action', 'clientId', 'status success with safe schema', 'Missing token or missing schema tab', 'Cannot redirect writes into unsafe tabs.'],
+  ['submitWorkerIntake', 'Pending Worker Intake', 'workerName, accessStatus, roleTrade, contact', 'workerId, notes', 'status success with submission ID', 'Validation failure or missing pending tab', 'Writes pending worker intake only.'],
+  ['submitPayPeriod', 'Pending Pay Period Intake', 'payPeriodId, workerId, periodStart, periodEnd', 'workerName, payDate, notes', 'status success with submission ID', 'Validation failure or missing pending tab', 'Writes pending pay period only.'],
+  ['submitTimeEntry', 'Pending Time Entries', 'workerId, payPeriodId, workDate, jobWorkType, hoursWorked, rate', 'entryId, workerName, notes', 'status success with submission ID', 'Validation failure or missing pending tab', 'Writes pending time entry only.']
+];
+
+function installCrewPayBridgeTabs() {
+  var workbook = SpreadsheetApp.getActiveSpreadsheet();
+  if (!workbook) {
+    throw new Error('No active workbook is available. Run this bridge as a bound workbook script.');
+  }
+
+  var result = {
+    workbookName: workbook.getName(),
+    workbookUrl: workbook.getUrl(),
+    createdTabs: [],
+    verifiedTabs: [],
+    missingFailedTabs: []
+  };
+
+  CP_BRIDGE_REQUIRED_TABS.forEach(function (definition) {
+    try {
+      var sheet = workbook.getSheetByName(definition.name);
+      var created = false;
+      if (!sheet) {
+        sheet = workbook.insertSheet(definition.name);
+        created = true;
+        result.createdTabs.push(definition.name);
+      }
+
+      ensureBridgeHeaders_(sheet, definition.headers, created);
+      formatBridgeSetupSheet_(sheet, definition.headers.length);
+      if (definition.name === CP_BRIDGE.READ_TABS.SCHEMA) {
+        seedBridgeSchemaIfEmpty_(sheet);
+      }
+
+      var missingHeaders = missingHeaders_(sheet, definition.headers);
+      if (missingHeaders.length) {
+        result.missingFailedTabs.push({ tab: definition.name, missingHeaders: missingHeaders });
+      } else {
+        result.verifiedTabs.push(definition.name);
+      }
+    } catch (err) {
+      result.missingFailedTabs.push({ tab: definition.name, error: String(err && err.message ? err.message : err) });
+    }
+  });
+
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function debugCrewPayBridgeWorkbook() {
+  var workbook = SpreadsheetApp.getActiveSpreadsheet();
+  if (!workbook) {
+    throw new Error('No active workbook is available. Run this bridge as a bound workbook script.');
+  }
+
+  var tabNames = workbook.getSheets().map(function (sheet) { return sheet.getName(); });
+  var requiredStatus = CP_BRIDGE_REQUIRED_TABS.map(function (definition) {
+    return {
+      tab: definition.name,
+      status: workbook.getSheetByName(definition.name) ? 'FOUND' : 'MISSING'
+    };
+  });
+  var result = {
+    workbookName: workbook.getName(),
+    workbookUrl: workbook.getUrl(),
+    tabNames: tabNames,
+    requiredBridgeTabs: requiredStatus
+  };
+
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function ensureBridgeHeaders_(sheet, requiredHeaders, wasCreated) {
+  var existingLastColumn = sheet.getLastColumn();
+  var existingHeaders = [];
+  if (existingLastColumn > 0) {
+    existingHeaders = sheet.getRange(1, 1, 1, existingLastColumn).getValues()[0]
+      .map(function (value) { return String(value || '').trim(); });
+  }
+  var rowIsBlank = existingHeaders.join('').trim() === '';
+
+  if (wasCreated || rowIsBlank) {
+    sheet.getRange(1, 1, 1, requiredHeaders.length).setValues([requiredHeaders]);
+    return;
+  }
+
+  var present = {};
+  existingHeaders.forEach(function (header) {
+    if (header) present[header] = true;
+  });
+  var missing = requiredHeaders.filter(function (header) { return !present[header]; });
+  if (missing.length) {
+    sheet.getRange(1, existingLastColumn + 1, 1, missing.length).setValues([missing]);
+  }
+}
+
+function formatBridgeSetupSheet_(sheet, headerCount) {
+  sheet.setFrozenRows(1);
+  if (headerCount > 0) {
+    var range = sheet.getRange(1, 1, 1, headerCount);
+    range.setFontWeight('bold');
+    range.setBackground('#eaf1fb');
+    range.setWrap(true);
+  }
+  try {
+    sheet.autoResizeColumns(1, Math.max(headerCount, 1));
+  } catch (ignored) {
+    // Auto-resize is cosmetic only.
+  }
+}
+
+function seedBridgeSchemaIfEmpty_(sheet) {
+  if (sheet.getLastRow() > 1) return;
+  sheet.getRange(2, 1, CP_BRIDGE_SCHEMA_SEED_ROWS.length, CP_BRIDGE_SCHEMA_SEED_ROWS[0].length)
+    .setValues(CP_BRIDGE_SCHEMA_SEED_ROWS);
+}
+
+function missingHeaders_(sheet, requiredHeaders) {
+  var existing = {};
+  if (sheet.getLastColumn() > 0) {
+    sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].forEach(function (value) {
+      var header = String(value || '').trim();
+      if (header) existing[header] = true;
+    });
+  }
+  return requiredHeaders.filter(function (header) { return !existing[header]; });
+}
+
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) || 'healthCheck';
   if (action !== 'healthCheck') {
@@ -450,7 +609,7 @@ function getSheet_(sheetName) {
   }
   var sheet = workbook.getSheetByName(sheetName);
   if (!sheet) {
-    throw new BridgeUserError_('Required sheet not found: ' + sheetName);
+    throw new BridgeUserError_('Bridge setup incomplete. Missing required sheet: ' + sheetName + '. Run installCrewPayBridgeTabs from Apps Script, then deploy a new Web App version.');
   }
   return sheet;
 }

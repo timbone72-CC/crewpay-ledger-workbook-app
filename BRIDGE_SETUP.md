@@ -29,25 +29,38 @@ The bridge writes only to:
 - `Pending Pay Period Intake`
 - `Pending Time Entries`
 
-The bridge does not write to `Worker Proof`, dashboard/report tabs, formula areas, or final ledger tabs.
+The bridge also verifies/reads `Bridge Schema`. The bridge does not write to `Worker Proof`, dashboard/report tabs, formula areas, or final ledger tabs.
 
 ## Deploy In Google Apps Script
 
-1. Open the CrewPay Ledger workbook in Google Sheets.
+The workbook helper script and bridge script are separate Apps Script files. Keep the helper/menu code in its own file and paste the bridge endpoint code into a separate file such as `CrewPay_Ledger_BRIDGE.gs`.
+
+1. Open the deployed CrewPay Ledger workbook in Google Sheets.
 2. Go to `Extensions > Apps Script`.
-3. Add a new script file for the bridge, or replace the default editor content with `apps_script/CrewPay_Ledger_BRIDGE.gs`.
-4. In Apps Script, open `Project Settings > Script Properties`.
-5. Add property:
+3. Add a separate Apps Script file named `CrewPay_Ledger_BRIDGE.gs`.
+4. Paste the current contents of `apps_script/CrewPay_Ledger_BRIDGE.gs`.
+5. Save the Apps Script project.
+6. From the Apps Script editor function dropdown, run `installCrewPayBridgeTabs` once. This creates or verifies:
+   - `App Submission Log`
+   - `Pending Worker Intake`
+   - `Pending Pay Period Intake`
+   - `Pending Time Entries`
+   - `Bridge Schema`
+7. Run `debugCrewPayBridgeWorkbook` and confirm all required bridge tabs show `FOUND` in the execution log.
+8. In Apps Script, open `Project Settings > Script Properties`.
+9. Add property:
    - Name: `CP_BRIDGE_TOKEN`
    - Value: a private/demo token you choose
-6. Click `Deploy > New deployment`.
-7. Select `Web app`.
-8. Execute as: the admin account that owns or can edit the workbook.
-9. Who has access: choose the narrowest option that works for your demo/testing setup.
-10. Copy the Web App URL.
-11. Open the CrewPay Admin App and paste the Web App URL into `Workbook Bridge`.
-12. Paste the same token into the optional token field.
-13. Run `Test Workbook Bridge`, then `Test Write Access`.
+10. Click `Deploy > New deployment` for a first deployment, or `Deploy > Manage deployments` and edit/create a new version for an existing Web App URL.
+11. Select `Web app`.
+12. Execute as: the admin account that owns or can edit the workbook.
+13. Who has access: choose the narrowest option that works for your demo/testing setup.
+14. Copy the Web App URL.
+15. Open the CrewPay Admin App and paste the Web App URL into `Workbook Bridge`.
+16. Paste the same token into the optional token field.
+17. Run `Test Workbook Bridge`, `Test Write Access`, `Load Pending Summary`, then the three sample submit forms.
+
+After every Apps Script code change, save the script and update/redeploy the Web App deployment so the live URL runs the latest code.
 
 ## Token Caveat
 
@@ -96,7 +109,7 @@ Error response:
 | `healthCheck` | No | POST may log only | `App Submission Log` for POST telemetry |
 | `testWriteAccess` | Yes | Yes | `App Submission Log` |
 | `getPendingSummary` | Yes | No | Counts pending rows only |
-| `getWorkbookSchema` | Yes | No | Reads `Bridge Schema` |
+| `getWorkbookSchema` | Yes | No | Reads/verifies `Bridge Schema` |
 | `submitWorkerIntake` | Yes | Yes | `Pending Worker Intake` and `App Submission Log` |
 | `submitPayPeriod` | Yes | Yes | `Pending Pay Period Intake` and `App Submission Log` |
 | `submitTimeEntry` | Yes | Yes | `Pending Time Entries` and `App Submission Log` |
@@ -246,15 +259,18 @@ Error response:
 
 ## Manual Test Checklist
 
-1. Deploy `apps_script/CrewPay_Ledger_BRIDGE.gs` as a Web App.
-2. Set `CP_BRIDGE_TOKEN` in Script Properties.
-3. Open the static CrewPay Admin App.
-4. Go to `Workbook Bridge`.
-5. Paste the Web App URL and token, then save locally.
-6. Run `Test Workbook Bridge`.
-7. Run `Test Write Access`; verify a row appears in `App Submission Log`.
-8. Run `Load Pending Summary`; verify counts return without row detail.
-9. Submit Worker Intake; verify a row appears in `Pending Worker Intake` and `App Submission Log`.
-10. Submit Pay Period Intake; verify a row appears in `Pending Pay Period Intake` and `App Submission Log`.
-11. Submit Time Entry; verify a row appears in `Pending Time Entries` and `App Submission Log`.
-12. Confirm no rows are written directly to proof, dashboard, formula, or final ledger tabs.
+1. Paste/save `apps_script/CrewPay_Ledger_BRIDGE.gs` into a separate Apps Script file.
+2. Run `installCrewPayBridgeTabs`.
+3. Run `debugCrewPayBridgeWorkbook` and confirm each bridge tab is `FOUND`.
+4. Set `CP_BRIDGE_TOKEN` in Script Properties.
+5. Deploy or update the Web App deployment.
+6. Open the static CrewPay Admin App.
+7. Go to `Workbook Bridge`.
+8. Paste the Web App URL and token, then save locally.
+9. Run `Test Workbook Bridge`.
+10. Run `Test Write Access`; verify a row appears in `App Submission Log`.
+11. Run `Load Pending Summary`; verify counts return without row detail.
+12. Submit Worker Intake; verify a row appears in `Pending Worker Intake` and `App Submission Log`.
+13. Submit Pay Period Intake; verify a row appears in `Pending Pay Period Intake` and `App Submission Log`.
+14. Submit Time Entry; verify a row appears in `Pending Time Entries` and `App Submission Log`.
+15. Confirm no rows are written directly to proof, dashboard, formula, or final ledger tabs.

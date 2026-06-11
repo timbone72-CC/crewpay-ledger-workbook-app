@@ -40,7 +40,7 @@ The static app can now be configured as a no-backend admin companion for the wor
 CrewPay Admin App -> Apps Script Web App -> pending workbook intake tabs -> workbook review
 ```
 
-Bridge setup instructions are in `BRIDGE_SETUP.md`. The bridge script is `apps_script/CrewPay_Ledger_BRIDGE.gs`.
+Bridge setup instructions are in `BRIDGE_SETUP.md`. The bridge script is `apps_script/CrewPay_Ledger_BRIDGE.gs`; run `installCrewPayBridgeTabs` in Apps Script before testing bridge writes against a deployed workbook.
 
 The app remains admin-side only. It does not add worker login, worker self-service, a backend server, a database, payroll execution, tax logic, HR compliance logic, or banking workflows.
 

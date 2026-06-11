@@ -104,6 +104,9 @@ const appJs = readRepoFile("app.js");
 const indexHtml = readRepoFile("index.html");
 const bridgeScript = readRepoFile("apps_script/CrewPay_Ledger_BRIDGE.gs");
 const bridgeSetup = readRepoFile("BRIDGE_SETUP.md");
+const bridgeNotes = readRepoFile("WORKBOOK_BRIDGE_READY_NOTES.md");
+const appsScriptReadme = readRepoFile("apps_script/README.md");
+const originalFinalScript = readRepoFile("apps_script/CrewPay_Ledger_ORIGINAL_FINAL.gs");
 
 assert.match(indexHtml, /CrewPay Admin App/);
 assert.match(appJs, /Workbook Bridge/);
@@ -121,6 +124,8 @@ assert.match(indexHtml + appJs, /no separate backend, database, worker login/i);
 
 assert.match(bridgeScript, /function doGet\(e\)/);
 assert.match(bridgeScript, /function doPost\(e\)/);
+assert.match(bridgeScript, /function installCrewPayBridgeTabs\(\)/);
+assert.match(bridgeScript, /function debugCrewPayBridgeWorkbook\(\)/);
 assert.match(bridgeScript, /PropertiesService\.getScriptProperties\(\)\.getProperty\(CP_BRIDGE\.TOKEN_PROPERTY\)/);
 assert.match(bridgeScript, /LockService\.getScriptLock\(\)/);
 assert.match(bridgeScript, /submitWorkerIntake/);
@@ -149,5 +154,29 @@ assert.match(bridgeSetup, /CP_BRIDGE_TOKEN/);
 assert.match(bridgeSetup, /Field Mapping/);
 assert.match(bridgeSetup, /Records submitted from the app land in pending tabs first/);
 assert.match(bridgeSetup, /no separate backend, database, worker accounts, worker login/);
+
+const requiredBridgeTabs = [
+  "App Submission Log",
+  "Pending Worker Intake",
+  "Pending Pay Period Intake",
+  "Pending Time Entries",
+  "Bridge Schema",
+];
+for (const tabName of requiredBridgeTabs) {
+  assert.match(bridgeScript, new RegExp(tabName));
+  assert.match(bridgeSetup, new RegExp(tabName));
+  assert.match(bridgeNotes + appsScriptReadme, new RegExp(tabName));
+}
+assert.match(bridgeSetup, /Run `installCrewPayBridgeTabs`/);
+assert.match(bridgeSetup, /Run `debugCrewPayBridgeWorkbook`/);
+assert.match(bridgeSetup, /update\/redeploy the Web App deployment/);
+
+assert.match(originalFinalScript, /function onOpen\(\)/);
+assert.match(originalFinalScript, /function generateWorkerProof\(\)/);
+assert.match(originalFinalScript, /function logProofExport\(\)/);
+assert.match(originalFinalScript, /function logAccessChange\(\)/);
+assert.match(originalFinalScript, /function logCorrection\(\)/);
+assert.match(originalFinalScript, /function createEmailReadyNotice\(\)/);
+assert.doesNotMatch(originalFinalScript, /doPost|installCrewPayBridgeTabs|debugCrewPayBridgeWorkbook/);
 
 console.log("Acceptance tests passed");

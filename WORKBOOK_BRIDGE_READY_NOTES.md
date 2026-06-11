@@ -52,7 +52,7 @@ The bridge script remains separate from the preserved original final script.
 
 The admin app bridge foundation now includes:
 
-1. `apps_script/CrewPay_Ledger_BRIDGE.gs` with `doGet` / `doPost` action routing.
+1. `apps_script/CrewPay_Ledger_BRIDGE.gs` with `doGet` / `doPost` action routing plus `installCrewPayBridgeTabs` and `debugCrewPayBridgeWorkbook`.
 2. Admin app bridge configuration stored locally in the browser.
 3. `healthCheck`, `testWriteAccess`, `getPendingSummary`, `getWorkbookSchema`, `submitWorkerIntake`, `submitPayPeriod`, and `submitTimeEntry` action support.
 4. App Submission Log telemetry for bridge writes and setup/validation failures where practical.
@@ -60,4 +60,4 @@ The admin app bridge foundation now includes:
 
 ## Next Build Step
 
-Deploy the bridge manually in Google Apps Script, set `CP_BRIDGE_TOKEN`, paste the Web App URL into the CrewPay Admin App, and run the manual checks in `BRIDGE_SETUP.md`.
+Paste the updated bridge script into Apps Script, run `installCrewPayBridgeTabs`, run `debugCrewPayBridgeWorkbook`, set `CP_BRIDGE_TOKEN`, update/redeploy the Web App deployment, paste the Web App URL into the CrewPay Admin App, and run the manual checks in `BRIDGE_SETUP.md`.
