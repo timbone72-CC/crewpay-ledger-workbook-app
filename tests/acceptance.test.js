@@ -93,4 +93,61 @@ assert.equal(dashboard.active_workers, 1);
 assert.equal(dashboard.inactive_workers, 1);
 assert.equal(dashboard.pending_approvals, 0);
 
+const fs = require("node:fs");
+const path = require("node:path");
+
+function readRepoFile(relativePath) {
+  return fs.readFileSync(path.join(__dirname, "..", relativePath), "utf8");
+}
+
+const appJs = readRepoFile("app.js");
+const indexHtml = readRepoFile("index.html");
+const bridgeScript = readRepoFile("apps_script/CrewPay_Ledger_BRIDGE.gs");
+const bridgeSetup = readRepoFile("BRIDGE_SETUP.md");
+
+assert.match(indexHtml, /CrewPay Admin App/);
+assert.match(appJs, /Workbook Bridge/);
+assert.match(appJs, /BRIDGE_CONFIG_KEY/);
+assert.match(appJs, /Test Workbook Bridge/);
+assert.match(appJs, /testWriteAccess/);
+assert.match(appJs, /getPendingSummary/);
+assert.match(appJs, /submitWorkerIntake/);
+assert.match(appJs, /submitPayPeriod/);
+assert.match(appJs, /submitTimeEntry/);
+assert.match(appJs, /crewpay-admin-app/);
+assert.match(appJs, /Bridge not configured/);
+assert.doesNotMatch(indexHtml + appJs, /worker portal/i);
+assert.match(indexHtml + appJs, /no separate backend, database, worker login/i);
+
+assert.match(bridgeScript, /function doGet\(e\)/);
+assert.match(bridgeScript, /function doPost\(e\)/);
+assert.match(bridgeScript, /PropertiesService\.getScriptProperties\(\)\.getProperty\(CP_BRIDGE\.TOKEN_PROPERTY\)/);
+assert.match(bridgeScript, /LockService\.getScriptLock\(\)/);
+assert.match(bridgeScript, /submitWorkerIntake/);
+assert.match(bridgeScript, /submitPayPeriod/);
+assert.match(bridgeScript, /submitTimeEntry/);
+assert.match(bridgeScript, /testWriteAccess/);
+assert.match(bridgeScript, /getPendingSummary/);
+assert.match(bridgeScript, /getWorkbookSchema/);
+assert.match(bridgeScript, /ContentService/);
+assert.match(bridgeScript, /Pending Worker Intake/);
+assert.match(bridgeScript, /Pending Pay Period Intake/);
+assert.match(bridgeScript, /Pending Time Entries/);
+assert.match(bridgeScript, /App Submission Log/);
+assert.doesNotMatch(bridgeScript, /GmailApp|MailApp|CalendarApp|DriveApp|Jdbc|UrlFetchApp/);
+assert.doesNotMatch(bridgeScript, /TODO|\.\.\./);
+
+const allowedWriteTabs = bridgeScript.match(/ALLOWED_WRITE_TABS:\s*\[([\s\S]*?)\]/)?.[1] || "";
+assert.match(allowedWriteTabs, /App Submission Log/);
+assert.match(allowedWriteTabs, /Pending Worker Intake/);
+assert.match(allowedWriteTabs, /Pending Pay Period Intake/);
+assert.match(allowedWriteTabs, /Pending Time Entries/);
+assert.doesNotMatch(allowedWriteTabs, /Worker Proof|Dashboard|Pay Periods|'Time Entries'|'Workers'/);
+
+assert.match(bridgeSetup, /CrewPay is the admin app/);
+assert.match(bridgeSetup, /CP_BRIDGE_TOKEN/);
+assert.match(bridgeSetup, /Field Mapping/);
+assert.match(bridgeSetup, /Records submitted from the app land in pending tabs first/);
+assert.match(bridgeSetup, /no separate backend, database, worker accounts, worker login/);
+
 console.log("Acceptance tests passed");

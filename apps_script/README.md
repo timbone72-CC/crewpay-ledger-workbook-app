@@ -40,6 +40,15 @@ The workbook remains the Level 1 source of truth. If this script is removed or d
 - optional admin companion app bridge
 - worker field timesheet app bridge
 
+
+## Admin App Bridge Script
+
+The no-backend admin app bridge is intentionally isolated in:
+
+`apps_script/CrewPay_Ledger_BRIDGE.gs`
+
+That file contains the Web App endpoint for admin app submissions to pending workbook intake tabs. It is separate from the workbook-helper script in `apps_script/Code.gs` and separate from the preserved original final helper script. See `BRIDGE_SETUP.md` for deployment and token setup.
+
 ## Manual Install
 
 1. Open `CrewPay_Ledger_Workbook.xlsx` in Google Sheets.

@@ -1,4 +1,6 @@
 const STORAGE_KEY = "crewpay-ledger-mvp-v1";
+const BRIDGE_CONFIG_KEY = "crewpay-admin-bridge-config-v1";
+const CLIENT_ID = "crewpay-admin-app";
 
 const sampleData = {
   workers: [
@@ -162,6 +164,9 @@ const sampleData = {
 };
 
 let data = loadData();
+let bridgeConfig = loadBridgeConfig();
+let bridgeResult = null;
+let pendingSummary = null;
 let currentSection = "dashboard";
 let lastProof = null;
 
@@ -173,6 +178,47 @@ function loadData() {
   } catch {
     return structuredClone(sampleData);
   }
+}
+
+
+function loadBridgeConfig() {
+  const stored = localStorage.getItem(BRIDGE_CONFIG_KEY);
+  if (!stored) return { url: "", token: "" };
+  try {
+    const parsed = JSON.parse(stored);
+    return { url: parsed.url || "", token: parsed.token || "" };
+  } catch {
+    return { url: "", token: "" };
+  }
+}
+
+function saveBridgeConfig(config) {
+  bridgeConfig = {
+    url: (config.url || "").trim(),
+    token: (config.token || "").trim(),
+  };
+  localStorage.setItem(BRIDGE_CONFIG_KEY, JSON.stringify(bridgeConfig));
+}
+
+function clearBridgeConfig() {
+  bridgeConfig = { url: "", token: "" };
+  bridgeResult = { status: "info", message: "Bridge configuration cleared from this browser." };
+  pendingSummary = null;
+  localStorage.removeItem(BRIDGE_CONFIG_KEY);
+  render();
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function bridgeConfigured() {
+  return Boolean(bridgeConfig.url);
 }
 
 function saveData() {
@@ -247,6 +293,7 @@ function render() {
     time: renderTimeEntries,
     periods: renderPayPeriods,
     proof: renderWorkerProof,
+    bridge: renderBridge,
     access: renderAccessModel,
   };
   byId("app").innerHTML = views[currentSection]();
@@ -266,10 +313,13 @@ function renderDashboard() {
     <section class="panel">
       <div class="section-title">
         <div>
-          <p class="eyebrow">Local-first MVP</p>
-          <h2>Dashboard</h2>
+          <p class="eyebrow">Admin workbook companion</p>
+          <h2>CrewPay Admin Dashboard</h2>
         </div>
         <button class="secondary" data-action="reset">Reset sample data</button>
+      </div>
+      <div class="flow-strip" aria-label="System flow">
+        <span>Admin App</span><strong>→</strong><span>Apps Script Bridge</span><strong>→</strong><span>Pending Intake Tabs</span><strong>→</strong><span>Workbook Review</span>
       </div>
       <div class="cards">
         <article class="metric"><span>Active Workers</span><strong>${summary.active_workers}</strong></article>
@@ -279,8 +329,8 @@ function renderDashboard() {
         <article class="metric"><span>Proof Exports Logged</span><strong>${paidProofs}</strong></article>
       </div>
       <div class="notice">
-        Worker proof is separated by selected worker. Inactive status blocks future time entry but
-        does not hide historical records or proof.
+        CrewPay is the admin-side control panel. The workbook remains the source of truth and final record authority.
+        Bridge submissions land in pending intake tabs for workbook review; this app has no separate backend or database.
       </div>
     </section>
   `;
@@ -538,6 +588,115 @@ function proofHtml(proof) {
   `;
 }
 
+
+function renderBridge() {
+  const configStatus = bridgeConfigured() ? "Configured in this browser" : "Bridge not configured";
+  const resultHtml = bridgeResult
+    ? `<pre class="bridge-result ${bridgeResult.status === "error" ? "danger" : "success"}">${escapeHtml(JSON.stringify(bridgeResult, null, 2))}</pre>`
+    : `<p class="muted">Run a bridge test or submit a sample intake record to see the response.</p>`;
+  const summaryHtml = pendingSummary
+    ? `
+      <div class="cards compact">
+        <article class="metric"><span>Worker Intake Pending</span><strong>${pendingSummary.workerIntakePending ?? 0}</strong></article>
+        <article class="metric"><span>Pay Period Intake Pending</span><strong>${pendingSummary.payPeriodIntakePending ?? 0}</strong></article>
+        <article class="metric"><span>Time Entries Pending</span><strong>${pendingSummary.timeEntriesPending ?? 0}</strong></article>
+      </div>`
+    : `<p class="muted">Pending summary returns counts only and does not expose workbook row data.</p>`;
+
+  return `
+    <section class="panel">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">No-backend workbook bridge</p>
+          <h2>Workbook Bridge</h2>
+        </div>
+        <span class="pill ${bridgeConfigured() ? "success" : ""}">${configStatus}</span>
+      </div>
+
+      <div class="notice">
+        This admin app can submit controlled records through a deployed Apps Script Web App. Records land in workbook pending intake tabs first. Review and promotion stay workbook-controlled.
+      </div>
+
+      <div class="bridge-grid">
+        <article class="info-card bridge-card">
+          <h3>Bridge configuration</h3>
+          <p class="muted">Saved locally in this browser only. The URL and token are not workbook data. The token is a basic private/demo gate, not full authentication.</p>
+          <form class="form-grid stack" data-form="bridge-config">
+            <label>Apps Script Web App URL<input name="url" type="url" value="${escapeHtml(bridgeConfig.url)}" placeholder="https://script.google.com/macros/s/DEPLOYMENT_ID/exec" /></label>
+            <label>Optional demo/private token<input name="token" type="password" value="${escapeHtml(bridgeConfig.token)}" autocomplete="off" /></label>
+            <button type="submit">Save Bridge Config</button>
+            <button type="button" class="secondary" data-action="clear-bridge-config">Clear Config</button>
+          </form>
+        </article>
+
+        <article class="info-card bridge-card">
+          <h3>Bridge diagnostics</h3>
+          <p class="muted">Use these checks after deploying <code>apps_script/CrewPay_Ledger_BRIDGE.gs</code> as a Web App.</p>
+          <div class="actions block-actions">
+            <button data-action="bridge-health">Test Workbook Bridge</button>
+            <button class="secondary" data-action="bridge-test-write">Test Write Access</button>
+            <button class="secondary" data-action="bridge-pending-summary">Load Pending Summary</button>
+          </div>
+          ${summaryHtml}
+        </article>
+      </div>
+
+      <div class="bridge-grid three">
+        <article class="info-card bridge-card">
+          <h3>Worker intake</h3>
+          <p class="muted">Submits to <code>Pending Worker Intake</code> for workbook review.</p>
+          <form class="form-grid stack" data-form="bridge-worker">
+            <label>Worker ID<input name="workerId" value="W-010" /></label>
+            <label>Worker Name<input name="workerName" required value="Sample Admin Worker" /></label>
+            <label>Access Status<select name="accessStatus"><option>Active</option><option>Inactive</option></select></label>
+            <label>Role / Trade<input name="roleTrade" required value="Crew" /></label>
+            <label>Contact<input name="contact" required value="sample.worker@example.local" /></label>
+            <label>Notes<input name="notes" value="Submitted from CrewPay Admin App" /></label>
+            <button type="submit">Submit Worker Intake</button>
+          </form>
+        </article>
+
+        <article class="info-card bridge-card">
+          <h3>Pay period intake</h3>
+          <p class="muted">Submits to <code>Pending Pay Period Intake</code> for workbook review.</p>
+          <form class="form-grid stack" data-form="bridge-period">
+            <label>Pay Period ID<input name="payPeriodId" required value="PP-010" /></label>
+            <label>Worker ID<input name="workerId" required value="W-010" /></label>
+            <label>Worker Name<input name="workerName" value="Sample Admin Worker" /></label>
+            <label>Period Start<input name="periodStart" type="date" required value="2026-06-08" /></label>
+            <label>Period End<input name="periodEnd" type="date" required value="2026-06-14" /></label>
+            <label>Pay Date<input name="payDate" type="date" value="2026-06-21" /></label>
+            <label>Notes<input name="notes" value="Submitted from CrewPay Admin App" /></label>
+            <button type="submit">Submit Pay Period</button>
+          </form>
+        </article>
+
+        <article class="info-card bridge-card">
+          <h3>Time entry intake</h3>
+          <p class="muted">Submits to <code>Pending Time Entries</code> for workbook review.</p>
+          <form class="form-grid stack" data-form="bridge-time">
+            <label>Entry ID<input name="entryId" value="E-010" /></label>
+            <label>Worker ID<input name="workerId" required value="W-010" /></label>
+            <label>Worker Name<input name="workerName" value="Sample Admin Worker" /></label>
+            <label>Pay Period ID<input name="payPeriodId" required value="PP-010" /></label>
+            <label>Work Date<input name="workDate" type="date" required value="2026-06-10" /></label>
+            <label>Job / Work Type<input name="jobWorkType" required value="Sample Work" /></label>
+            <label>Hours<input name="hoursWorked" type="number" min="0.25" max="24" step="0.01" required value="8" /></label>
+            <label>Rate<input name="rate" type="number" min="0" step="0.01" required value="25" /></label>
+            <label>Notes<input name="notes" value="Submitted from CrewPay Admin App" /></label>
+            <button type="submit">Submit Time Entry</button>
+          </form>
+        </article>
+      </div>
+
+      <div class="notice">
+        Every successful bridge write should append <code>App Submission Log</code>. Future FieldOps-style input tools can use the same pending intake structure later, but this repo is the admin-side CrewPay app.
+      </div>
+      ${resultHtml}
+    </section>
+  `;
+}
+
 function renderAccessModel() {
   return `
     <section class="panel">
@@ -605,6 +764,27 @@ function attachHandlers() {
     button.addEventListener("click", exportCurrentProof);
   });
 
+  document.querySelectorAll("[data-action='clear-bridge-config']").forEach((button) => {
+    button.addEventListener("click", clearBridgeConfig);
+  });
+
+  document.querySelectorAll("[data-action='bridge-health']").forEach((button) => {
+    button.addEventListener("click", () => runBridgeAction("healthCheck", {}, { includeToken: false }));
+  });
+
+  document.querySelectorAll("[data-action='bridge-test-write']").forEach((button) => {
+    button.addEventListener("click", () => runBridgeAction("testWriteAccess", { source: "admin-ui" }));
+  });
+
+  document.querySelectorAll("[data-action='bridge-pending-summary']").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const response = await runBridgeAction("getPendingSummary", {}, { silentRender: true });
+      if (response?.status === "success") pendingSummary = response.data.summary;
+      bridgeResult = response;
+      render();
+    });
+  });
+
   const workerSelect = document.querySelector("[data-role='proof-worker']");
   if (workerSelect) {
     workerSelect.addEventListener("change", updateProofPeriodOptions);
@@ -624,10 +804,96 @@ function handleFormSubmit(event) {
   if (form.dataset.form === "job") addJob(formData);
   if (form.dataset.form === "entry") addEntry(formData);
   if (form.dataset.form === "proof") generateProof(formData);
+  if (form.dataset.form === "bridge-config") saveBridgeConfigFromForm(formData);
+  if (form.dataset.form === "bridge-worker") submitBridgeWorker(formData);
+  if (form.dataset.form === "bridge-period") submitBridgePayPeriod(formData);
+  if (form.dataset.form === "bridge-time") submitBridgeTimeEntry(formData);
 }
 
 function nextId(prefix, list, key) {
   return `${prefix}-${String(list.length + 1).padStart(4, "0")}`;
+}
+
+
+function saveBridgeConfigFromForm(formData) {
+  saveBridgeConfig(formData);
+  bridgeResult = { status: "success", data: { action: "saveBridgeConfig", message: "Bridge settings saved locally in this browser." } };
+  render();
+}
+
+async function submitBridgeWorker(formData) {
+  await runBridgeAction("submitWorkerIntake", {
+    workerId: formData.workerId,
+    workerName: formData.workerName,
+    accessStatus: formData.accessStatus,
+    roleTrade: formData.roleTrade,
+    contact: formData.contact,
+    notes: formData.notes,
+  });
+}
+
+async function submitBridgePayPeriod(formData) {
+  await runBridgeAction("submitPayPeriod", {
+    payPeriodId: formData.payPeriodId,
+    workerId: formData.workerId,
+    workerName: formData.workerName,
+    periodStart: formData.periodStart,
+    periodEnd: formData.periodEnd,
+    payDate: formData.payDate,
+    notes: formData.notes,
+  });
+}
+
+async function submitBridgeTimeEntry(formData) {
+  await runBridgeAction("submitTimeEntry", {
+    entryId: formData.entryId,
+    workerId: formData.workerId,
+    workerName: formData.workerName,
+    payPeriodId: formData.payPeriodId,
+    workDate: formData.workDate,
+    jobWorkType: formData.jobWorkType,
+    hoursWorked: Number(formData.hoursWorked),
+    rate: Number(formData.rate),
+    notes: formData.notes,
+  });
+}
+
+async function runBridgeAction(action, payload = {}, options = {}) {
+  if (!bridgeConfigured()) {
+    bridgeResult = { status: "error", message: "Bridge not configured. Add the Apps Script Web App URL first." };
+    if (!options.silentRender) render();
+    return bridgeResult;
+  }
+
+  const body = {
+    action,
+    clientId: CLIENT_ID,
+    payload,
+  };
+  if (options.includeToken !== false && bridgeConfig.token) {
+    body.token = bridgeConfig.token;
+  }
+
+  try {
+    const response = await fetch(bridgeConfig.url, {
+      method: "POST",
+      body: JSON.stringify(body),
+      redirect: "follow",
+    });
+    const text = await response.text();
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = { status: "error", message: "Bridge returned a non-JSON response.", raw: text.slice(0, 500) };
+    }
+    bridgeResult = parsed;
+  } catch (error) {
+    bridgeResult = { status: "error", message: error.message || "Bridge request failed." };
+  }
+
+  if (!options.silentRender) render();
+  return bridgeResult;
 }
 
 function addWorker(formData) {

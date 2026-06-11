@@ -1,6 +1,6 @@
 # CrewPay Ledger
 
-CrewPay Ledger is a timesheet, pay-proof, and access-control system for crews, workers, and admins.
+CrewPay Ledger is a workbook-first timesheet, pay-proof, and access-control system with an optional CrewPay Admin App companion.
 
 Core goals:
 - Make timesheets easy to give to workers and admins.
@@ -30,6 +30,19 @@ Output:
 ```text
 CrewPay_Ledger_Workbook.xlsx
 ```
+
+
+## CrewPay Admin App Bridge
+
+The static app can now be configured as a no-backend admin companion for the workbook. The bridge path is:
+
+```text
+CrewPay Admin App -> Apps Script Web App -> pending workbook intake tabs -> workbook review
+```
+
+Bridge setup instructions are in `BRIDGE_SETUP.md`. The bridge script is `apps_script/CrewPay_Ledger_BRIDGE.gs`.
+
+The app remains admin-side only. It does not add worker login, worker self-service, a backend server, a database, payroll execution, tax logic, HR compliance logic, or banking workflows.
 
 ## Optional Apps Script Helpers
 

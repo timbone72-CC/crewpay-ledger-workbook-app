@@ -3,18 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CrewPay Ledger MVP</title>
+    <title>CrewPay Admin App | CrewPay Ledger</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <header class="hero">
       <div>
-        <p class="eyebrow">CrewPay Ledger MVP</p>
-        <h1>Timesheets, pay-period totals, and worker proof that survives inactive access.</h1>
+        <p class="eyebrow">CrewPay Admin App</p>
+        <h1>No-backend admin control panel for a workbook-first CrewPay Ledger.</h1>
         <p>
-          A small local-first proof-of-concept for crews, workers, and admins. This MVP uses sample
-          data and browser storage only. It does not include login, payroll tax logic, cloud storage,
-          email delivery, GPS, messaging, notifications, or a backend database.
+          This admin companion can submit controlled intake records through Google Apps Script into
+          workbook pending tabs. The workbook remains the source of truth and final record authority.
+          The app has no separate backend, database, worker login, payroll tax logic, HR system, or banking workflow.
         </p>
       </div>
     </header>
@@ -26,6 +26,7 @@
       <button class="nav-button" data-section="time">Time Entries</button>
       <button class="nav-button" data-section="periods">Pay Periods</button>
       <button class="nav-button" data-section="proof">Worker Proof</button>
+      <button class="nav-button" data-section="bridge">Workbook Bridge</button>
       <button class="nav-button" data-section="access">Access Model</button>
     </nav>
 

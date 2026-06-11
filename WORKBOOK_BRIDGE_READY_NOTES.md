@@ -26,11 +26,11 @@ The pending/intake tabs give the companion app explicit write targets without le
 
 ## Workbook Remains Source Of Truth
 
-CrewPay Ledger remains workbook-first. The workbook must still function manually without the companion app or Apps Script bridge. The app can support intake, but the workbook remains the final authority for ledger records, worker proof, pay-period totals, access history, corrections, notices, and audit logs.
+CrewPay Ledger remains workbook-first. The workbook must still function manually without the companion app or Apps Script bridge. The CrewPay Admin App can support controlled admin intake through Apps Script, but the workbook remains the final authority for ledger records, worker proof, pay-period totals, access history, corrections, notices, and audit logs.
 
 ## Future App Bridge Path
 
-A future Apps Script Web App bridge can submit controlled records into:
+The new isolated Apps Script bridge `apps_script/CrewPay_Ledger_BRIDGE.gs` can submit controlled admin records into:
 
 - `Pending Worker Intake`
 - `Pending Pay Period Intake`
@@ -46,15 +46,18 @@ The preserved original final helper script was not changed:
 - `apps_script/CrewPay_Ledger_ORIGINAL_FINAL.gs`
 - `release-package/CrewPay_Ledger_DEMO_PACKAGE/CrewPay_Ledger_ORIGINAL_FINAL.gs`
 
-Future bridge work should remain separate from the preserved original final script.
+The bridge script remains separate from the preserved original final script.
+
+## Bridge Foundation Added
+
+The admin app bridge foundation now includes:
+
+1. `apps_script/CrewPay_Ledger_BRIDGE.gs` with `doGet` / `doPost` action routing.
+2. Admin app bridge configuration stored locally in the browser.
+3. `healthCheck`, `testWriteAccess`, `getPendingSummary`, `getWorkbookSchema`, `submitWorkerIntake`, `submitPayPeriod`, and `submitTimeEntry` action support.
+4. App Submission Log telemetry for bridge writes and setup/validation failures where practical.
+5. No direct final-tab, proof-tab, dashboard, or formula-area writes.
 
 ## Next Build Step
 
-Build the Apps Script Web App bridge and app endpoint wiring:
-
-1. Add endpoint configuration in the static app.
-2. Add Apps Script `doGet` / `doPost` action routing.
-3. Implement `healthCheck` and `getWorkbookSchema` first.
-4. Implement controlled writes to pending/intake tabs.
-5. Add submission logging and duplicate/idempotency checks.
-6. Add acceptance tests proving the app writes only to approved intake/log tabs.
+Deploy the bridge manually in Google Apps Script, set `CP_BRIDGE_TOKEN`, paste the Web App URL into the CrewPay Admin App, and run the manual checks in `BRIDGE_SETUP.md`.
