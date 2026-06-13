@@ -44,6 +44,26 @@ Bridge setup instructions are in `BRIDGE_SETUP.md`. The bridge script is `apps_s
 
 The app remains admin-side only. It does not add worker login, worker self-service, a backend server, a database, payroll execution, tax logic, HR compliance logic, or banking workflows.
 
+## CrewPay Owner Control Workbook
+
+Tim-only private control plane workbook for client access, billing, bridge health, feature flags, calendar visibility, support notes, and owner audit history.
+
+Build it with:
+
+```bash
+python3 build_crewpay_owner_control_workbook.py
+```
+
+Output:
+
+```text
+CrewPay_Owner_Control_Workbook.xlsx
+```
+
+The owner workbook is separate from the operational ledger workbook and must not contain worker private records, worker proof, payroll detail, or real bridge tokens/endpoints.
+
+The owner-control Apps Script includes a `Run Owner Control Self Check` menu item and fails safely if required owner-control tabs or headers are missing or if it appears pasted into the wrong workbook. Do not paste it into the operational CrewPay Ledger workbook; the ledger helper scripts and bridge script remain separate.
+
 ## Optional Apps Script Helpers
 
 Phase 1 optional Google Apps Script helpers live in `apps_script/`.
